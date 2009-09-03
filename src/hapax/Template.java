@@ -112,25 +112,25 @@ public final class Template
                         final PrintWriter writer)
         throws TemplateException
     {
-        for (int i = 0; i < template.size(); i++) {
+        for (int position = 0; position < template.size(); position++) {
 
-            TemplateNode node = template.get(i);
+            TemplateNode node = template.get(position);
 
             switch (node.getTemplateType()){
 
             case TemplateTypeSection:
 
-                i = this.renderSectionNode(template, dict, i, writer);
+                position = this.renderSectionNode(template, dict, position, node, writer);
                 break;
 
             case TemplateTypeEztDefine:
 
-                i = this.renderEztDefineNode(template, dict, i);
+                position = this.renderEztDefineNode(template, dict, position, node);
                 break;
 
             case TemplateTypeEztConditional:
 
-                i = this.renderEztConditionalNode(template, dict, i, writer);
+                position = this.renderEztConditionalNode(template, dict, position, node, writer);
                 break;
 
             default:
@@ -142,15 +142,13 @@ public final class Template
     /**
      * Render case
      */
-    private int renderSectionNode(final List<TemplateNode> template,
-                                  final TemplateDictionary dict,
-                                  final int open,
-                                  final PrintWriter writer)
+    private int renderSectionNode(List<TemplateNode> template, TemplateDictionary dict, int open,
+                                  TemplateNode node, PrintWriter writer)
         throws TemplateException
     {
-        SectionNode section = (SectionNode) template.get(open);
+        SectionNode section = (SectionNode)node;
         int next = (open + 1);
-        int close = indexOfClose(template, next, section);
+        int close = section.getIndexOfClose();
 
         if (close == template.size())
             throw new TemplateException("missing close tag for " + section.getSectionName());
@@ -187,15 +185,15 @@ public final class Template
     /**
      * Render case
      */
-    private int renderEztDefineNode(List<TemplateNode> template,
-                                    TemplateDictionary dict, int node)
+    private int renderEztDefineNode(List<TemplateNode> template, TemplateDictionary dict,
+                                    int position, TemplateNode node)
         throws TemplateException
     {
-        EztDefineNode edn = (EztDefineNode) template.get(node);
+        EztDefineNode edn = (EztDefineNode)node;
 
         String var_name = edn.getVariableName();
 
-        Range range = edn.advise(template, node);
+        Range range = edn.advise(template, position);
 
         List<TemplateNode> view = template.subList(range.getStart(), range.getStop());
         {
@@ -212,14 +210,13 @@ public final class Template
     /**
      * Render case
      */
-    private int renderEztConditionalNode(List<TemplateNode> template,
-                                         TemplateDictionary dict,
-                                         int node, PrintWriter writer)
+    private int renderEztConditionalNode(List<TemplateNode> template, TemplateDictionary dict,
+                                         int position, TemplateNode node, PrintWriter writer)
         throws TemplateException
     {
-        EztConditionalNode ecn = (EztConditionalNode) template.get(node);
+        EztConditionalNode ecn = (EztConditionalNode)node;
 
-        Range range = ecn.advise(template, node, dict);
+        Range range = ecn.advise(template, position, dict);
 
         List<TemplateNode> view = template.subList(range.getStart(), range.getStop());
 
@@ -228,43 +225,4 @@ public final class Template
         return range.getSkipTo();
     }
 
-    private final static int indexOfClose(List<TemplateNode> template, int ofs, SectionNode node)
-        throws TemplateException
-    {
-        ofs += 1;
-        for ( int stack = 0; ofs < template.size(); ++ofs) {
-
-            TemplateNode tp = template.get(ofs);
-
-            if (TemplateTypeSection == tp.getTemplateType()) {
-
-                SectionNode section = (SectionNode) tp;
-
-                if (section.isOpenSectionTag()) {
-
-                    stack++;
-                }
-                else if (section.isCloseSectionTag()) {
-
-                    if (section.getSectionName().equals(node.getSectionName()))
-
-                        return ofs;
-
-                    else {
-                        if (stack == 0) {
-                            String msg = MessageFormat.format("mismatched close tag: expecting a close tag for {0}, " +
-                                                              "but got close tag for {1}", node.getSectionName(),
-                                                              section.getSectionName());
-
-                            throw new TemplateException(msg);
-                        }
-                        else {
-                            stack--;
-                        }
-                    }
-                }
-            }
-        }
-        return -1;
-    }
 }

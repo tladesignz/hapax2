@@ -29,6 +29,9 @@ public final class SectionNode
     private final String sectionName_;
     private final TYPE type_;
 
+    volatile int indexOfClose;
+
+
     private SectionNode(String nodeName, TYPE node_type) {
         super();
         this.sectionName_ = nodeName;
@@ -59,4 +62,7 @@ public final class SectionNode
         return type_ == TYPE.CLOSE;
     }
 
+    public int getIndexOfClose(){
+        return this.indexOfClose;
+    }
 }

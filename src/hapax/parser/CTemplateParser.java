@@ -4,10 +4,12 @@ import hapax.Template;
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoaderContext;
+import static hapax.parser.TemplateNode.TemplateType.*;
+
+import java.text.MessageFormat;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -147,7 +149,7 @@ public final class CTemplateParser
             }
                 break;
             case END_INPUT:
-                return list;
+                return this.close(list);
 
             default:
                 throw new RuntimeException("Internal error parsing template.");
@@ -155,6 +157,34 @@ public final class CTemplateParser
             if (null != node)
                 list.add(node);
         }
+    }
+
+    /**
+     * Terminal scan
+     */
+    private static List<TemplateNode> close(List<TemplateNode> template)
+        throws TemplateParserException
+    {
+
+        for (int cc = 0, count = template.size(); cc < count; cc++){
+
+            TemplateNode node = template.get(cc);
+
+            switch (node.getTemplateType()){
+
+            case TemplateTypeSection:
+
+                SectionNode section = (SectionNode)node;
+
+                section.indexOfClose = IndexOfClose(template,cc,section);
+
+                break;
+            default:
+                break;
+            }
+        }
+
+        return template;
     }
 
     private static TemplateNode parseTextNode(StringBuilder input) {
@@ -226,5 +256,45 @@ public final class CTemplateParser
             return string_to_return;
         }
         throw new TemplateParserException("Unexpected or malformed input: " + input);
+    }
+
+    private final static int IndexOfClose(List<TemplateNode> template, int ofs, SectionNode node)
+        throws TemplateParserException
+    {
+        ofs += 1;
+        for ( int stack = 0; ofs < template.size(); ++ofs) {
+
+            TemplateNode tp = template.get(ofs);
+
+            if (TemplateTypeSection == tp.getTemplateType()) {
+
+                SectionNode section = (SectionNode) tp;
+
+                if (section.isOpenSectionTag()) {
+
+                    stack++;
+                }
+                else if (section.isCloseSectionTag()) {
+
+                    if (section.getSectionName().equals(node.getSectionName()))
+
+                        return ofs;
+
+                    else {
+                        if (stack == 0) {
+                            String msg = MessageFormat.format("mismatched close tag: expecting a close tag for {0}, " +
+                                                              "but got close tag for {1}", node.getSectionName(),
+                                                              section.getSectionName());
+
+                            throw new TemplateParserException(msg);
+                        }
+                        else {
+                            stack--;
+                        }
+                    }
+                }
+            }
+        }
+        return -1;
     }
 }
