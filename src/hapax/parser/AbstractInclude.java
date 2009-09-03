@@ -35,7 +35,7 @@ public abstract class AbstractInclude
 
 
     @Override
-    public final void evaluate(TemplateDictionary dict, TemplateLoaderContext context, PrintWriter collector)
+    public final void evaluate(TemplateDictionary dict, TemplateLoaderContext context, PrintWriter out)
         throws TemplateException
     {
         String filename = this.resolveName(dict,context);
@@ -52,9 +52,9 @@ public abstract class AbstractInclude
             PrintWriter previous_printwriter = null;
             StringWriter sw = null;
             if (this.modifiers.size() > 0) {
-                previous_printwriter = collector;
+                previous_printwriter = out;
                 sw = new StringWriter();
-                collector = new PrintWriter(sw);
+                out = new PrintWriter(sw);
             }
 
             List<TemplateDictionary> child_dicts = dict.getChildDicts(filename);
@@ -63,21 +63,21 @@ public abstract class AbstractInclude
                 /*
                  * Once
                  */
-                template.render(dict, collector);
+                template.render(dict, out);
             }
             else {
                 /*
                  * Repeat
                  */
                 for (TemplateDictionary subdict : child_dicts) {
-                    template.render(subdict, collector);
+                    template.render(subdict, out);
                 }
             }
 
             if (previous_printwriter != null) {
                 String results = sw.toString();
-                collector = previous_printwriter;
-                collector.write(Modifiers.applyModifiers(results, this.modifiers));
+                out = previous_printwriter;
+                out.write(Modifiers.applyModifiers(results, this.modifiers));
             }
         }
     }

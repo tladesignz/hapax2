@@ -91,31 +91,33 @@ public final class CTemplateParser
     private static NODE_TYPE next(StringBuilder input) {
 
         int inlen = input.length();
-        if (0 < inlen){
-            if (1 < inlen){
-                if ('{' == input.charAt(0) && '{' == input.charAt(0)){
-                    if (2 < inlen){
-                        switch (input.charAt(2)){
-                        case '#':
-                            return NODE_TYPE.OPEN_SECTION;
-                        case '/':
-                            return NODE_TYPE.CLOSE_SECTION;
-                        case '>':
-                            return NODE_TYPE.INCLUDE_SECTION;
-                        case '{':
-                        case '[':
-                            return NODE_TYPE.EZT_BLOCK;
-                        default:
-                            break;
-                        }
-                    }
+        switch (inlen){
+        case 0:
+            return NODE_TYPE.END_INPUT;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            return NODE_TYPE.TEXT_NODE;
+        default:
+            if ('{' == input.charAt(0) && '{' == input.charAt(1)){
+
+                switch (input.charAt(2)){
+                case '#':
+                    return NODE_TYPE.OPEN_SECTION;
+                case '/':
+                    return NODE_TYPE.CLOSE_SECTION;
+                case '>':
+                    return NODE_TYPE.INCLUDE_SECTION;
+                case '{':
+                case '[':
+                    return NODE_TYPE.EZT_BLOCK;
+                default:
                     return NODE_TYPE.VARIABLE;
                 }
             }
             return NODE_TYPE.TEXT_NODE;
         }
-        else
-            return NODE_TYPE.END_INPUT;
     }
 
     public List<TemplateNode> parse(TemplateLoaderContext context, String template)

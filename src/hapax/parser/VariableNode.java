@@ -2,6 +2,7 @@ package hapax.parser;
 
 import hapax.Modifiers;
 import hapax.TemplateDictionary;
+import hapax.TemplateException;
 import hapax.TemplateLoaderContext;
 
 import java.io.PrintWriter;
@@ -41,14 +42,22 @@ public final class VariableNode
 
     @Override
     public void evaluate(TemplateDictionary dict, TemplateLoaderContext context,
-                         PrintWriter collector)
+                         PrintWriter out)
     {
         String t = dict.get(variable);
-        if (!dict.contains(variable))
+        if (null == t)
             return;
         else {
+            try {
+                t = CTemplateParser.Eval(context,dict,t);
+            }
+            catch (TemplateException ignore){
+                ignore.printStackTrace();
+            }
+
             t = Modifiers.applyModifiers(t, this.modifiers);
-            collector.write(t);
+
+            out.write(t);
         }
     }
 
