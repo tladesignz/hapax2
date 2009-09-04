@@ -8,7 +8,6 @@ import static hapax.parser.TemplateNode.TemplateType.*;
 
 import java.text.MessageFormat;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,12 +16,6 @@ import java.util.regex.Pattern;
  * This parser turns strings containing the contents of a template into a list
  * of TemplateNodes.
  * 
- * Expressions include ctemplate language, with {@link EztParser EZT
- * language} embedded within <code>"{{{"</code> and
- * <code>"}}}"</code>.  Note that <code>"{{["</code> and
- * <code>"]}}"</code> operate equivalently.
- * 
- *
  * @author dcoker
  * @author jdp
  */
@@ -52,7 +45,7 @@ public final class CTemplateParser
     }
 
     private enum NODE_TYPE {
-        OPEN_SECTION, CLOSE_SECTION, VARIABLE, TEXT_NODE, INCLUDE_SECTION, EZT_BLOCK, END_INPUT ;
+        OPEN_SECTION, CLOSE_SECTION, VARIABLE, TEXT_NODE, INCLUDE_SECTION, END_INPUT ;
     }
 
 
@@ -109,9 +102,6 @@ public final class CTemplateParser
                     return NODE_TYPE.CLOSE_SECTION;
                 case '>':
                     return NODE_TYPE.INCLUDE_SECTION;
-                case '{':
-                case '[':
-                    return NODE_TYPE.EZT_BLOCK;
                 default:
                     return NODE_TYPE.VARIABLE;
                 }
@@ -123,7 +113,7 @@ public final class CTemplateParser
     public List<TemplateNode> parse(TemplateLoaderContext context, String template)
         throws TemplateParserException
     {
-        List<TemplateNode> list = new LinkedList<TemplateNode>();
+        List<TemplateNode> list = new java.util.ArrayList<TemplateNode>();
         StringBuilder input = new StringBuilder(template);
         TemplateNode node = null;
         while (true) {
@@ -143,13 +133,7 @@ public final class CTemplateParser
             case INCLUDE_SECTION:
                 node = parseInclude(input);
                 break;
-            case EZT_BLOCK:{
-                node = null;
-                List<TemplateNode> block = parseEztBlock(context,input);
-                if (null != block && 0 < block.size())
-                    list.addAll(block);
-            }
-                break;
+
             case END_INPUT:
                 return this.close(list);
 
@@ -172,15 +156,21 @@ public final class CTemplateParser
 
             TemplateNode node = template.get(cc);
 
+            node.ofs = cc;
+
             switch (node.getTemplateType()){
 
-            case TemplateTypeSection:
+            case TemplateTypeSection:{
 
                 SectionNode section = (SectionNode)node;
 
-                section.indexOfClose = IndexOfClose(template,cc,section);
-
+                if (section.isOpenSectionTag())
+                    section.indexOfClose = IndexOfClose(template,cc,section);
+                else
+                    section.indexOfClose = Integer.MAX_VALUE;//(flypaper)
+            }
                 break;
+
             default:
                 break;
             }
@@ -230,22 +220,6 @@ public final class CTemplateParser
     {
         String consumed = consume(input, RE_OPEN_SECTION);
         return (SectionNode.Open(consumed));
-    }
-
-    private static List<TemplateNode> parseEztBlock(TemplateLoaderContext context, StringBuilder input)
-        throws TemplateParserException
-    {
-        int end = input.indexOf("}}}");
-        if (0 > end)
-            end = input.indexOf("]}}");
-        if (0 < end){
-            String source = input.substring(3,end);
-            end += 3;
-            input.delete(0,end);
-            return EztParser.Instance.parse(context,source);
-        }
-        else 
-            throw new TemplateParserException("Missing matching '}}}' for opening '{{{' in '"+input+"'.");
     }
 
     private static String consume(StringBuilder input, Pattern p)

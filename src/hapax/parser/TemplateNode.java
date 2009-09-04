@@ -21,18 +21,25 @@ public abstract class TemplateNode {
      */
     public enum TemplateType {
         TemplateTypeSection,
-        TemplateTypeEztDefine,
-        TemplateTypeEztConditional,
         TemplateTypeNode
     }
  
 
-    public TemplateType getTemplateType(){
-        return TemplateType.TemplateTypeNode;
+    volatile int ofs = -1;
+
+
+    TemplateNode(){
+        super();
     }
 
 
-    public abstract void evaluate(TemplateDictionary dict, TemplateLoaderContext context,
-                                  PrintWriter collector)
-        throws TemplateException;
+    public TemplateType getTemplateType(){
+        return TemplateType.TemplateTypeNode;
+    }
+    public void evaluate(TemplateDictionary dict, TemplateLoaderContext context,
+                         PrintWriter collector) 
+        throws TemplateException 
+    {
+    }
+
 }

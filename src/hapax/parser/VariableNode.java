@@ -44,19 +44,13 @@ public final class VariableNode
     public void evaluate(TemplateDictionary dict, TemplateLoaderContext context,
                          PrintWriter out)
     {
-        String t = dict.get(variable);
+        String t = dict.getVariable(variable);
         if (null == t)
             return;
+        else if (this.modifiers.isEmpty())
+            out.write(t);
         else {
-            try {
-                t = CTemplateParser.Eval(context,dict,t);
-            }
-            catch (TemplateException ignore){
-                ignore.printStackTrace();
-            }
-
             t = Modifiers.applyModifiers(t, this.modifiers);
-
             out.write(t);
         }
     }

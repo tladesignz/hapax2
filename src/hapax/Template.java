@@ -1,10 +1,6 @@
 package hapax;
 
 import hapax.parser.CTemplateParser;
-import hapax.parser.EztConditionalNode;
-import hapax.parser.EztDefineNode;
-import hapax.parser.EztParser;
-import hapax.parser.Range;
 import hapax.parser.SectionNode;
 import hapax.parser.TemplateNode;
 import static hapax.parser.TemplateNode.TemplateType.*;
@@ -31,19 +27,10 @@ public final class Template
     /**
      * Parse and render a C template.
      */
-    public final static String EvalCt(TemplateLoaderContext context, TemplateDictionary dict, String source)
+    public final static String Eval(TemplateLoaderContext context, TemplateDictionary dict, String source)
         throws TemplateException
     {
         Template template = new Template(CTemplateParser.Instance,source,context);
-        return template.renderToString(dict);
-    }
-    /**
-     * Parse and render an EZT template.
-     */
-    public final static String EvalEzt(TemplateLoaderContext context, TemplateDictionary dict, String source)
-        throws TemplateException
-    {
-        Template template = new Template(EztParser.Instance,source,context);
         return template.renderToString(dict);
     }
 
@@ -104,12 +91,8 @@ public final class Template
 
         return buffer.toString();
     }
-    /**
-     * Main render driver
-     */
-    private void render(final List<TemplateNode> template,
-                        final TemplateDictionary dict,
-                        final PrintWriter writer)
+
+    private void render(List<TemplateNode> template, TemplateDictionary dict, PrintWriter writer)
         throws TemplateException
     {
         for (int position = 0; position < template.size(); position++) {
@@ -120,17 +103,7 @@ public final class Template
 
             case TemplateTypeSection:
 
-                position = this.renderSectionNode(template, dict, position, node, writer);
-                break;
-
-            case TemplateTypeEztDefine:
-
-                position = this.renderEztDefineNode(template, dict, position, node);
-                break;
-
-            case TemplateTypeEztConditional:
-
-                position = this.renderEztConditionalNode(template, dict, position, node, writer);
+                position = this.renderSectionNode(template, dict, position, ((SectionNode)node), writer);
                 break;
 
             default:
@@ -139,31 +112,24 @@ public final class Template
             }
         }
     }
-    /**
-     * Render case
-     */
     private int renderSectionNode(List<TemplateNode> template, TemplateDictionary dict, int open,
-                                  TemplateNode node, PrintWriter writer)
+                                  SectionNode section, PrintWriter writer)
         throws TemplateException
     {
-        SectionNode section = (SectionNode)node;
         int next = (open + 1);
         int close = section.getIndexOfClose();
 
-        if (close == template.size())
-            throw new TemplateException("missing close tag for " + section.getSectionName());
-        else {
-            /* If this section is hidden, we don't render the intermediate
-             * nodes.
-             */
-            if (dict.isSectionHidden(section.getSectionName()))
+        if (close >= next && close < template.size()){
 
-                return close;
+            String sectionName = section.getSectionName();
 
-            else {
-                List<TemplateDictionary> subdicts = dict.getChildDicts(section.getSectionName());
+            List<TemplateDictionary> data = dict.getSection(sectionName);
 
-                if (subdicts.size() == 0) {
+            if (null != data){
+
+                if (data.size() == 0) {
+
+                    Iterator.Define(dict,sectionName,0,1);
                     /*
                      * Once
                      */
@@ -173,56 +139,20 @@ public final class Template
                     /*
                      * Repeat
                      */
-                    for (TemplateDictionary subdict : subdicts) {
+                    for (int cc = 0, count = data.size(); cc < count; cc++){
 
-                        this.render(template.subList(next, close), subdict, writer);
+                        TemplateDictionary child = data.get(cc);
+
+                        Iterator.Define(child,sectionName,cc,count);
+
+                        this.render(template.subList(next, close), child, writer);
                     }
                 }
-                return close;
             }
+            return close;
         }
-    }
-    /**
-     * Render case
-     */
-    private int renderEztDefineNode(List<TemplateNode> template, TemplateDictionary dict,
-                                    int position, TemplateNode node)
-        throws TemplateException
-    {
-        EztDefineNode edn = (EztDefineNode)node;
-
-        String var_name = edn.getVariableName();
-
-        Range range = edn.advise(template, position);
-
-        List<TemplateNode> view = template.subList(range.getStart(), range.getStop());
-        {
-            StringWriter buffer = new StringWriter();
-
-            this.render(view, dict, new PrintWriter(buffer));
-
-            String result = buffer.toString();
-
-            dict.put(var_name, result);
-        }
-        return range.getSkipTo();
-    }
-    /**
-     * Render case
-     */
-    private int renderEztConditionalNode(List<TemplateNode> template, TemplateDictionary dict,
-                                         int position, TemplateNode node, PrintWriter writer)
-        throws TemplateException
-    {
-        EztConditionalNode ecn = (EztConditionalNode)node;
-
-        Range range = ecn.advise(template, position, dict);
-
-        List<TemplateNode> view = template.subList(range.getStart(), range.getStop());
-
-        this.render(view, dict, writer);
-
-        return range.getSkipTo();
+        else
+            throw new TemplateException("Missing close tag for section '" + section.getSectionName()+"'.");
     }
 
 }

@@ -29,7 +29,7 @@ public final class SectionNode
     private final String sectionName_;
     private final TYPE type_;
 
-    volatile int indexOfClose;
+    volatile int indexOfClose = -1;
 
 
     private SectionNode(String nodeName, TYPE node_type) {

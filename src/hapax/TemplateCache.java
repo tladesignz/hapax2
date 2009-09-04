@@ -2,7 +2,6 @@ package hapax;
 
 import hapax.parser.TemplateParser;
 import hapax.parser.CTemplateParser;
-import hapax.parser.EztParser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,19 +24,11 @@ public class TemplateCache
 {
 
     /**
-     * Creates a TemplateLoader for the default CTemplate language
-     * with embedded EZT language.
+     * Creates a TemplateLoader for CTemplate language
      */
     public static TemplateLoader create(String base_path)
     {
         return new TemplateCache(base_path);
-    }
-    /**
-     * Creates a TemplateLoader using the EZT parser exclusively.
-     */
-    public static TemplateLoader createForEzt(String base_path)
-    {
-        return new TemplateCache(base_path, EztParser.Instance);
     }
     /**
      * Creates a TemplateLoader using the argument parser.
