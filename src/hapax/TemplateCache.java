@@ -6,8 +6,10 @@ import hapax.parser.CTemplateParser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,61 +63,125 @@ public class TemplateCache
     /**
      * Parses and fetches a template from disk.
      *
-     * @param filename The path to the template, relative to the templateDirectory
+     * @param resource The path to the template, relative to the templateDirectory
      *                 passed to the ctor of TemplateCache.
      */
-    public final Template getTemplate(String filename)
+    public Template getTemplate(String resource)
         throws TemplateException
     {
-        filename = Path.toFile(this.baseDir, filename);
+        String filename = Path.toFile(this.baseDir, resource);
+        try {
+            URL url = new URL(filename);
 
-        File file = new File(filename);
-        /*
-         * stat fs once on cache hit
-         */
-        long fileLast = file.lastModified();
+            return this.read(url);
+        }
+        catch (java.net.MalformedURLException exc){
 
-        Template template = this.hitCache(filename, fileLast);
+            File file = new File(filename);
+            /*
+             * stat fs once on cache hit
+             */
+            long fileLast = file.lastModified();
 
-        if (null != template)
+            Template template = this.hitCache(file.getPath(), fileLast);
 
-            return template;
+            if (null != template)
 
-        else {
-            String contents = null;
-            FileReader reader = null;
-            try {
-                reader = new FileReader(file);
-
-                contents = this.readToString(reader);
-            }
-            catch (IOException e) {
-                throw new TemplateException(e);
-            }
-            finally {
-                if (null != reader){
-                    try {
-                        reader.close();
-                    }
-                    catch (IOException ignore){
-                    }
-                }
-            }
-            TemplateLoaderContext context = new TemplateLoaderContext(this, file.getParent());
-            TemplateParser parser = this.parser;
-            if (null == parser)
-                template = new Template(fileLast, contents, context);
-            else
-                template = new Template(fileLast, parser, contents, context);
-
-            synchronized(this.cache){
-                this.cache.put(filename,template);
-            }
-            return template;
+                return template;
+            else 
+                return this.read( file, fileLast);
         }
     }
 
-    private final static String readToString(Reader in)
+    /**
+     * Url fetch with no caching.
+     */
+    protected Template read(URL url)
+        throws TemplateException
+    {
+        String parent = Parent(url);
+
+        TemplateLoaderContext context = new TemplateLoaderContext(this, parent, false);
+
+        String contents;
+
+        InputStream in = null;
+        try {
+            in = url.openStream();
+
+            contents = this.readToString(new java.io.InputStreamReader(in));
+        }
+        catch (IOException exc){
+            throw new TemplateException(url.toString(),exc);
+        }
+        finally {
+            try {
+                in.close();
+            }
+            catch (IOException ignore){
+            }
+        }
+
+        TemplateParser parser = this.parser;
+
+        if (null == parser)
+            return (new Template(contents, context));
+        else
+            return (new Template(parser, contents, context));
+    }
+
+    protected Template read(File file, long fileLast)
+        throws TemplateException
+    {
+        TemplateLoaderContext context = new TemplateLoaderContext(this, file.getParent());
+
+        String contents;
+
+        FileReader reader = null;
+        try {
+            reader = new FileReader(file);
+
+            contents = this.readToString(reader);
+        }
+        catch (IOException exc) {
+            throw new TemplateException(file.getPath(),exc);
+        }
+        finally {
+            if (null != reader){
+                try {
+                    reader.close();
+                }
+                catch (IOException ignore){
+                }
+            }
+        }
+
+        Template template;
+
+        TemplateParser parser = this.parser;
+        if (null == parser)
+            template = new Template(fileLast, contents, context);
+        else
+            template = new Template(fileLast, parser, contents, context);
+
+        synchronized(this.cache){
+            this.cache.put(file.getPath(),template);
+        }
+        return template;
+    }
+
+    protected final Template hitCache(String filename, long fileLast)
+    {
+        Template template = this.cache.get(filename);
+        if (null != template){
+            long templateLast = template.getLastModified();
+            if (templateLast >= fileLast)
+                return template;
+        }
+        return null;
+    }
+
+    protected final static String readToString(Reader in)
         throws IOException
     {
         StringBuilder string = new StringBuilder();
@@ -127,14 +193,12 @@ public class TemplateCache
         return string.toString();
     }
 
-    private final Template hitCache(String filename, long fileLast)
-    {
-        Template template = this.cache.get(filename);
-        if (null != template){
-            long templateLast = template.getLastModified();
-            if (templateLast >= fileLast)
-                return template;
-        }
-        return null;
+    protected final static String Parent (URL u){
+        String url = u.toExternalForm();
+        int idx = url.lastIndexOf('/');
+        if (-1 != idx)
+            return url.substring(0,idx);
+        else
+            return url;
     }
 }

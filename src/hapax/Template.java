@@ -80,19 +80,19 @@ public final class Template
     public void render(TemplateDictionary dict, PrintWriter writer)
         throws TemplateException
     {
-        this.render(this.template, dict, writer);
+        this.render(Top, this.template, dict, writer);
     }
     public String renderToString(final TemplateDictionary dict)
         throws TemplateException
     {
         StringWriter buffer = new StringWriter();
 
-        this.render(this.template, dict, (new PrintWriter(buffer)));
+        this.render(Top, this.template, dict, (new PrintWriter(buffer)));
 
         return buffer.toString();
     }
 
-    private void render(List<TemplateNode> template, TemplateDictionary dict, PrintWriter writer)
+    private void render(int offset, List<TemplateNode> template, TemplateDictionary dict, PrintWriter writer)
         throws TemplateException
     {
         for (int position = 0; position < template.size(); position++) {
@@ -103,7 +103,7 @@ public final class Template
 
             case TemplateTypeSection:
 
-                position = this.renderSectionNode(template, dict, position, ((SectionNode)node), writer);
+                position = this.renderSectionNode(offset, template, dict, position, ((SectionNode)node), writer);
                 break;
 
             default:
@@ -112,12 +112,12 @@ public final class Template
             }
         }
     }
-    private int renderSectionNode(List<TemplateNode> template, TemplateDictionary dict, int open,
+    private int renderSectionNode(int offset, List<TemplateNode> template, TemplateDictionary dict, int open,
                                   SectionNode section, PrintWriter writer)
         throws TemplateException
     {
         int next = (open + 1);
-        int close = section.getIndexOfClose();
+        int close = (section.getIndexOfClose()-offset);
 
         if (close >= next && close < template.size()){
 
@@ -133,7 +133,7 @@ public final class Template
                     /*
                      * Once
                      */
-                    this.render(template.subList(next, close), dict, writer);
+                    this.render(next, template.subList(next, close), dict, writer);
                 }
                 else {
                     /*
@@ -145,7 +145,7 @@ public final class Template
 
                         Iterator.Define(child,sectionName,cc,count);
 
-                        this.render(template.subList(next, close), child, writer);
+                        this.render(next, template.subList(next, close), child, writer);
                     }
                 }
             }
@@ -155,4 +155,5 @@ public final class Template
             throw new TemplateException("Missing close tag for section '" + section.getSectionName()+"'.");
     }
 
+    private final static int Top = 0;
 }

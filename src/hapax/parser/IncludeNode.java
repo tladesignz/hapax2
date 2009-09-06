@@ -44,7 +44,7 @@ public final class IncludeNode
 
         if (this.acceptFile(dict,filename)){
             /*
-             * Load template
+             * Load template from resolved name
              */
             Template template = context.getLoader().getTemplate(filename);
 
@@ -53,7 +53,6 @@ public final class IncludeNode
             List<TemplateDictionary> section = dict.getSection(sectionName);
 
             if (null != section){
-
                 /*
                  * Modified rendering
                  */
@@ -106,7 +105,7 @@ public final class IncludeNode
          */
         String warning_flag = "__already__included__" + filename;
         if (dict.containsVariable(warning_flag)) {
-            String msg = MessageFormat.format("loop detected in {0} for {1}", this.name, filename);
+            String msg = MessageFormat.format("loop detected in '{0}' for '{1}'", this.name, filename);
             throw new CyclicIncludeException(msg);
         }
         else {
@@ -119,10 +118,18 @@ public final class IncludeNode
         throws TemplateException
     {
         String name = this.name;
+        /*
+         * When it's quoted, it's protected from a redirect via the
+         * variable map.
+         */
         String basename = TrimQuotes(name);
 
         if (name == basename){
+            /*
+             * If it's not quoted, look it up for a redirect
+             */
             String redirect = dict.getVariable(name);
+
             if (null != redirect && 0 != redirect.length())
                 basename = redirect;
         }

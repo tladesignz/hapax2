@@ -1,31 +1,41 @@
 package hapax;
 
 /**
- * TemplateLoaderContext represents information about a Template that is useful
- * to the TemplateLoader.  Specifically, this stores the directory of the template
- * that is being rendered so that [include] or {{>include}} syntax can use
- * relative paths.
+ * The template loader context is created in Template getTemplate for
+ * the template file.  Includes in the template will use this path to
+ * resolve their files.
  *
  * @author dcoker 
+ * @author jdp
  */
 public class TemplateLoaderContext {
 
-    private final TemplateLoader loader_;
-    private final String template_directory_;
+    private final TemplateLoader loader;
+    private final String template_directory;
+    private final boolean isfile;
 
-    public TemplateLoaderContext(TemplateLoader loader,
-                                 String template_directory)
-    {
+
+    public TemplateLoaderContext(TemplateLoader loader, String template_directory){
         super();
-        this.loader_ = loader;
-        this.template_directory_ = template_directory;
+        this.loader = loader;
+        this.template_directory = template_directory;
+        this.isfile = true;
+    }
+    public TemplateLoaderContext(TemplateLoader loader, String template_directory, boolean isf){
+        super();
+        this.loader = loader;
+        this.template_directory = template_directory;
+        this.isfile = isf;
     }
 
 
+    public boolean isFile(){
+        return this.isfile;
+    }
     public TemplateLoader getLoader() {
-        return loader_;
+        return loader;
     }
     public String getTemplateDirectory() {
-        return template_directory_;
+        return template_directory;
     }
 }

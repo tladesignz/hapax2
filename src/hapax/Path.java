@@ -40,7 +40,16 @@ public final class Path {
                 else {
                     int epl = ep.length();
                     if (0 != epl){
-                        if (el.startsWith(ep)){
+                        /*
+                         * Truncate the accumulated parent path if
+                         * it's already present in the next argument,
+                         * or when the next argument is a URI.
+                         * 
+                         * This permits an include to redirect to a
+                         * URI.
+                         */
+                        int isuri = el.indexOf(':');
+                        if (el.startsWith(ep) || -1 != isuri){
                             path.setLength(0);
                             path.append(el);
                         }

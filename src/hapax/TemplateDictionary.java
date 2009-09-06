@@ -4,17 +4,14 @@ import java.util.List;
 import java.util.HashMap;
 
 /**
- * Stateful eval scope in a nested dictionary.  
+ * The data dictionary contains the definition of variables, and
+ * controls the interpretation of includes and sections.
  * 
- * To initialize the eval state, put name - value mappings for
- * template variables, filenames from included names, and a list of
- * sections that have been explicitly shown into a new dictionary.
+ * An include or section that is visible (defined) enters the scope of
+ * a child dictionary.  
  * 
- * Enable sections with {@link showSection}, or subsequently disable
- * shown sections with {@link hideSection}.
- *
- * Create section- repeating child dictionaries with {@link
- * #addSection} for each repeated section.
+ * The child scope of an include or section inherits and overrides the
+ * data definitions of variables and sections from its ancestors.
  * 
  * @author dcoker
  * @author jdp
@@ -26,7 +23,6 @@ public final class TemplateDictionary
 
     /**
      * Creates a top-level TemplateDictionary.
-     *
      *
      * @return a new TemplateDictionary
      */
@@ -75,6 +71,10 @@ public final class TemplateDictionary
         }
     }
 
+    /*
+     * Variable API
+     */
+
     public boolean containsVariable(String varName) {
         varName = varName.toLowerCase();
 
@@ -89,9 +89,11 @@ public final class TemplateDictionary
     public String getVariable(String varName) {
         varName = varName.toLowerCase();
 
-        if (this.variables.containsKey(varName))
+        String value = this.variables.get(varName);
 
-            return this.variables.get(varName);
+        if (null != value)
+
+            return value;
 
         else if (this.parent != null) 
 
@@ -105,17 +107,10 @@ public final class TemplateDictionary
     public void putVariable(String varName, int val) {
         this.putVariable(varName, String.valueOf(val));
     }
-    public boolean ifAny(String name){
-        String value = this.getVariable(name);
-        return (null != value && 0 != value.length());
-    }
-    public boolean isEq(String name, String value){
-        String var = this.getVariable(name);
-        if (null != var && 0 != var.length())
-            return var.equals(value);
-        else
-            return false;
-    }
+
+    /*
+     * Section API
+     */
 
     public boolean isSectionHidden(String sectionName) {
         sectionName = sectionName.toLowerCase();
@@ -142,8 +137,27 @@ public final class TemplateDictionary
         List<TemplateDictionary> list = this.sections.get(sectionName);
         if (null != list)
             return list;
-        else 
-            return null;
+        else {
+            TemplateDictionary parent = this.parent;
+            if (null != parent)
+                /*
+                 * Permits {{>name01}} 
+                 *   containing {{#name01}} <section> {{/name01}}
+                 * 
+                 * to work when the section data is not
+                 * 
+                 *    (dictionary name01[1])/(dictionary name01[N]),
+                 * 
+                 * but only
+                 * 
+                 *    (dictionary name01[1]).
+                 * 
+                 * As for variables.
+                 */
+                return parent.getSection(sectionName);
+            else
+                return null;
+        }
     }
     public TemplateDictionary addSection(String sectionName) {
         sectionName = sectionName.toLowerCase();
