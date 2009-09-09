@@ -117,7 +117,7 @@ public final class Template
         throws TemplateException
     {
         int next = (open + 1);
-        int close = (section.getIndexOfClose()-offset);
+        int close = (open + section.getIndexOfCloseRelative());
 
         if (close >= next && close < template.size()){
 
@@ -152,7 +152,7 @@ public final class Template
             return close;
         }
         else
-            throw new TemplateException("Missing close tag for section '" + section.getSectionName()+"'.");
+            throw new TemplateException("Missing close tag for section '" + section.getSectionName()+"' at line "+section.lineNumber+".");
     }
 
     private final static int Top = 0;

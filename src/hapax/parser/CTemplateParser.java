@@ -37,42 +37,16 @@ public final class CTemplateParser
         return template.renderToString(dict);
     }
 
-
     final static List<TemplateNode> Parse(TemplateLoaderContext context, String template)
         throws TemplateParserException
     {
         return Instance.parse(context,template);
     }
 
+
     private enum NODE_TYPE {
         OPEN_SECTION, CLOSE_SECTION, VARIABLE, TEXT_NODE, INCLUDE_SECTION, END_INPUT ;
     }
-
-
-    private final static int RE_FLAGS =
-        Pattern.CASE_INSENSITIVE | Pattern.MULTILINE;
-
-    private final static String OPEN_SQUIGGLE = Pattern.quote("{{");
-
-    private final static String CLOSE_SQUIGGLE = Pattern.quote("}}");
-
-    private final static String VARIABLE_RE = "([a-zA-Z_]+(:[a-zA-Z]+)*)*";
-
-    private final static Pattern RE_OPEN_SECTION =
-        Pattern
-        .compile(OPEN_SQUIGGLE + "#([a-zA-Z_]+)" + CLOSE_SQUIGGLE, RE_FLAGS);
-
-    private final static Pattern RE_CLOSE_SECTION =
-        Pattern
-        .compile(OPEN_SQUIGGLE + "/([a-zA-Z_]+)" + CLOSE_SQUIGGLE, RE_FLAGS);
-
-    private final static Pattern RE_VARIABLE =
-        Pattern.compile(OPEN_SQUIGGLE + VARIABLE_RE + CLOSE_SQUIGGLE, RE_FLAGS);
-
-    private final static Pattern RE_INCLUDE =
-        Pattern
-        .compile(OPEN_SQUIGGLE + ">" + VARIABLE_RE + CLOSE_SQUIGGLE,
-                 RE_FLAGS);
 
 
 
@@ -81,7 +55,7 @@ public final class CTemplateParser
     }
 
 
-    private static NODE_TYPE next(StringBuilder input) {
+    private static NODE_TYPE next(ParserReader input) {
 
         int inlen = input.length();
         switch (inlen){
@@ -102,6 +76,8 @@ public final class CTemplateParser
                     return NODE_TYPE.CLOSE_SECTION;
                 case '>':
                     return NODE_TYPE.INCLUDE_SECTION;
+                case '=':
+                    return NODE_TYPE.VARIABLE;
                 default:
                     return NODE_TYPE.VARIABLE;
                 }
@@ -114,7 +90,7 @@ public final class CTemplateParser
         throws TemplateParserException
     {
         List<TemplateNode> list = new java.util.ArrayList<TemplateNode>();
-        StringBuilder input = new StringBuilder(template);
+        ParserReader input = new ParserReader(template);
         TemplateNode node = null;
         while (true) {
             switch (next(input)) {
@@ -179,66 +155,78 @@ public final class CTemplateParser
         return template;
     }
 
-    private static TemplateNode parseTextNode(StringBuilder input) {
+    private static TemplateNode parseTextNode(ParserReader input) {
+        int lno = input.lineNumber();
         int next_braces = input.indexOf("{{");
         if (next_braces == -1) { // no more parser syntax
-            String text = input.toString();
-            input.setLength(0);
-            input.trimToSize();
-            return (new TextNode(text));
+
+            String text = input.truncate();
+
+            return (new TextNode(lno,text));
         }
         else {
-            String text = input.substring(0, next_braces);
-            input.delete(0, next_braces);
+            String text = input.delete(0, next_braces);
             if (text.length() > 0)
-                return (new TextNode(text));
+                return (new TextNode(lno,text));
             else
                 return null;
         }
     }
 
-    private static TemplateNode parseInclude(StringBuilder input)
+    private static TemplateNode parseInclude(ParserReader input)
         throws TemplateParserException
     {
-        String consumed = consume(input, RE_INCLUDE);
-        return (new IncludeNode(consumed));
+        int lno = input.lineNumber();
+        String consumed = parseClose(input);
+        String token = consumed.substring(3,consumed.length()-5).trim();
+        return (new IncludeNode(lno,token));
     }
-    private static TemplateNode parseVariable(StringBuilder input)
+    private static TemplateNode parseVariable(ParserReader input)
         throws TemplateParserException
     {
-        String consumed = consume(input, RE_VARIABLE);
-        return (new VariableNode(consumed));
+        int lno = input.lineNumber();
+        String token;
+        String consumed = parseClose(input);
+        if ('=' == consumed.charAt(2))
+            token = consumed.substring(3,consumed.length()-2).trim();
+        else
+            token = consumed.substring(2,consumed.length()-2).trim();
+        return (new VariableNode(lno,token));
     }
-    private static TemplateNode parseCloseSection(StringBuilder input)
+    private static TemplateNode parseCloseSection(ParserReader input)
         throws TemplateParserException
     {
-        String consumed = consume(input, RE_CLOSE_SECTION);
-        return (SectionNode.Close(consumed));
+        int lno = input.lineNumber();
+        String consumed = parseClose(input);
+        String token = consumed.substring(3,consumed.length()-2).trim();
+        return (SectionNode.Close(lno,token));
     }
-    private static TemplateNode parseOpenSection(StringBuilder input)
+    private static TemplateNode parseOpenSection(ParserReader input)
         throws TemplateParserException
     {
-        String consumed = consume(input, RE_OPEN_SECTION);
-        return (SectionNode.Open(consumed));
+        int lno = input.lineNumber();
+        String consumed = parseClose(input);
+        String token = consumed.substring(3,consumed.length()-2).trim();
+        return (SectionNode.Open(lno,token));
     }
 
-    private static String consume(StringBuilder input, Pattern p)
+    private static String parseClose(ParserReader input)
         throws TemplateParserException
     {
-        Matcher m = p.matcher(input);
-        if (m.lookingAt()) {
-            String string_to_return = m.group(1);
-            input.delete(0, m.end());
-            return string_to_return;
+        int close_braces = input.indexOf("}}");
+        if (-1 == close_braces)
+            throw new TemplateParserException("Unexpected or malformed input: " + input+" at "+input.lineNumber());
+        else {
+            int end = close_braces+2;
+            return input.delete(0, end);
         }
-        throw new TemplateParserException("Unexpected or malformed input: " + input);
     }
 
-    private final static int IndexOfClose(List<TemplateNode> template, int ofs, SectionNode node)
+    private final static int IndexOfClose(List<TemplateNode> template, int node_ofs, SectionNode node)
         throws TemplateParserException
     {
-        ofs += 1;
-        for ( int stack = 0; ofs < template.size(); ++ofs) {
+        int stack = IndexOfCloseStackInit, ofs = (node_ofs+1), length = template.size();
+        for (; ofs < length; ofs++) {
 
             TemplateNode tp = template.get(ofs);
 
@@ -246,31 +234,31 @@ public final class CTemplateParser
 
                 SectionNode section = (SectionNode) tp;
 
-                if (section.isOpenSectionTag()) {
+                if (section.isOpenSectionTag())
 
                     stack++;
-                }
-                else if (section.isCloseSectionTag()) {
+
+                else if (IndexOfCloseStackInit == stack){
 
                     if (section.getSectionName().equals(node.getSectionName()))
 
                         return ofs;
 
                     else {
-                        if (stack == 0) {
-                            String msg = MessageFormat.format("mismatched close tag: expecting a close tag for {0}, " +
-                                                              "but got close tag for {1}", node.getSectionName(),
-                                                              section.getSectionName());
 
-                            throw new TemplateParserException(msg);
-                        }
-                        else {
-                            stack--;
-                        }
+                        String msg = MessageFormat.format("Mismatched close tag: expecting a close tag for \"{0}\", but got close tag for \"{1}\" at line {2}.", 
+                                                          node.getSectionName(),
+                                                          section.getSectionName(),
+                                                          section.lineNumber);
+                        throw new TemplateParserException(msg);
                     }
                 }
+                else
+                    stack--;
             }
         }
         return -1;
     }
+
+    private final static int IndexOfCloseStackInit = 0;
 }

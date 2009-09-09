@@ -17,8 +17,8 @@ public final class TextNode
     private final String text;
 
 
-    TextNode(String text) {
-        super();
+    TextNode(int lno, String text) {
+        super(lno);
         this.text = text;
     }
 

@@ -15,6 +15,11 @@ import java.io.PrintWriter;
  */
 public abstract class TemplateNode {
 
+    public interface Section {
+
+        public String getSectionName();
+    }
+
     /**
      * Primary rendering types.
      * @see hapax.Template#render
@@ -25,11 +30,14 @@ public abstract class TemplateNode {
     }
  
 
+    public final int lineNumber;
+
     volatile int ofs = -1;
 
 
-    TemplateNode(){
+    TemplateNode(int lno){
         super();
+        this.lineNumber = lno;
     }
 
 

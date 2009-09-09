@@ -27,14 +27,14 @@ public final class VariableNode
     private final List<Modifiers.FLAGS> modifiers;
 
 
-    VariableNode(String spec) {
-        this(spec.split(":"));
+    VariableNode(int lno, String spec) {
+        this(lno, spec.split(":"));
     }
-    private VariableNode(String[] spec) {
-        this(spec[0],Modifiers.parseModifiers(spec));
+    private VariableNode(int lno, String[] spec) {
+        this(lno,spec[0],Modifiers.parseModifiers(spec));
     }
-    private VariableNode(String variable, List<Modifiers.FLAGS> modifiers) {
-        super();
+    private VariableNode(int lno, String variable, List<Modifiers.FLAGS> modifiers) {
+        super(lno);
         this.variable = variable;
         this.modifiers = modifiers;
     }

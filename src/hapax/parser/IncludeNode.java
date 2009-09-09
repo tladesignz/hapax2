@@ -21,21 +21,25 @@ import java.util.List;
  */
 public final class IncludeNode
     extends TemplateNode
+    implements TemplateNode.Section
 {
 
-    final String name;
+    private final String name;
 
     final List<Modifiers.FLAGS> modifiers;
 
 
-    IncludeNode(String spec) {
-        super();
+    IncludeNode(int lno, String spec) {
+        super(lno);
         String split[] = spec.split(":");
         this.name = split[0];
         this.modifiers = Modifiers.parseModifiers(split);
     }
 
 
+    public String getSectionName(){
+        return this.name;
+    }
     @Override
     public final void evaluate(TemplateDictionary dict, TemplateLoaderContext context, PrintWriter out)
         throws TemplateException
