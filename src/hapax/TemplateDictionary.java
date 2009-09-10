@@ -76,7 +76,6 @@ public final class TemplateDictionary
      */
 
     public boolean containsVariable(String varName) {
-        varName = varName.toLowerCase();
 
         if (this.variables.containsKey(varName))
             return true;
@@ -87,7 +86,6 @@ public final class TemplateDictionary
     }
 
     public String getVariable(String varName) {
-        varName = varName.toLowerCase();
 
         String value = this.variables.get(varName);
 
@@ -102,9 +100,11 @@ public final class TemplateDictionary
             return "";
     }
     public void putVariable(String varName, String val) {
-        this.variables.put(varName.toLowerCase(), val);
+
+        this.variables.put(varName, val);
     }
     public void putVariable(String varName, int val) {
+
         this.putVariable(varName, String.valueOf(val));
     }
 
@@ -113,17 +113,14 @@ public final class TemplateDictionary
      */
 
     public boolean isSectionHidden(String sectionName) {
-        sectionName = sectionName.toLowerCase();
 
         return (!this.sections.containsKey(sectionName));
     }
     public boolean isSectionVisible(String sectionName) {
-        sectionName = sectionName.toLowerCase();
 
         return (this.sections.containsKey(sectionName));
     }
     public boolean hasSection(String sectionName){
-        sectionName = sectionName.toLowerCase();
 
         return (this.sections.containsKey(sectionName));
     }
@@ -132,7 +129,6 @@ public final class TemplateDictionary
      * section, or null for a section not visible.
      */
     public List<TemplateDictionary> getSection(String sectionName) {
-        sectionName = sectionName.toLowerCase();
 
         List<TemplateDictionary> list = this.sections.get(sectionName);
         if (null != list)
@@ -160,7 +156,6 @@ public final class TemplateDictionary
         }
     }
     public TemplateDictionary addSection(String sectionName) {
-        sectionName = sectionName.toLowerCase();
 
         TemplateDictionary add = new TemplateDictionary(this);
 
@@ -178,7 +173,6 @@ public final class TemplateDictionary
      * iteration data dictionary.
      */
     public List<TemplateDictionary> showSection(String sectionName) {
-        sectionName = sectionName.toLowerCase();
 
         List<TemplateDictionary> section = this.sections.get(sectionName);
         if (null == section){
@@ -190,7 +184,6 @@ public final class TemplateDictionary
         return section;
     }
     public void hideSection(String sectionName) {
-        sectionName = sectionName.toLowerCase();
 
         this.sections.remove(sectionName);
     }
