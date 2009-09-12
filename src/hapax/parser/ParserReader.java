@@ -14,6 +14,8 @@ public final class ParserReader
 
     private int lno = 1;
 
+    private int advance;
+
 
     public ParserReader(String string){
         super();
@@ -32,7 +34,14 @@ public final class ParserReader
         else
             return 0;
     }
+    public boolean next(){
+        this.advance += 1;
+        return true;
+    }
     public char charAt(int idx){
+
+        idx += this.advance;
+
         char[] buf = this.buffer;
         if (null != buf){
             if (-1 < idx && idx < buf.length)
@@ -43,6 +52,20 @@ public final class ParserReader
         else
             throw new IndexOutOfBoundsException(String.valueOf(idx)+":{0}");
     }
+    public char charAtTest(int idx){
+
+        idx += this.advance;
+
+        char[] buf = this.buffer;
+        if (null != buf){
+            if (-1 < idx && idx < buf.length)
+                return buf[idx];
+            else
+                return 0;
+        }
+        else
+            return 0;
+    }
     public int indexOf(String s){
         if (null != s && 0 != s.length()){
             char[] search = s.toCharArray();
@@ -50,21 +73,25 @@ public final class ParserReader
             if (null != buf){
                 int sc = 0;
                 int scc = search.length;
-                int idx = -1;
-                for (int bc = 0, bcc = buf.length; bc < bcc; bc++){
+                int start = -1;
 
-                    if (buf[bc] == search[sc++]){
+                int idx = this.advance;
+                int idxc = buf.length;
 
-                        if (-1 == idx)
-                            idx = bc;
+                for (; idx < idxc; idx++){
+
+                    if (buf[idx] == search[sc++]){
+
+                        if (-1 == start)
+                            start = idx;
 
                         if (sc >= scc)
-                            return idx;
+                            return start;
                         else
                             continue;
                     }
                     else {
-                        idx = -1;
+                        start = -1;
                         sc = 0;
                         continue;
                     }
@@ -80,6 +107,7 @@ public final class ParserReader
      * @param end Offset index, exclusive
      */
     public String delete(int start, int end){
+
         char[] buf = this.buffer;
         if (null != buf){
             int buflen = buf.length;
@@ -131,11 +159,13 @@ public final class ParserReader
             throw new IndexOutOfBoundsException(String.valueOf(start)+':'+String.valueOf(start)+":{0}");
     }
     public String truncate(){
-        char[] re = this.buffer;
+
+        char[] buf = this.buffer;
         this.buffer = null;
-        return this.lines(re,0,-1);
+        return this.lines(buf,0,-1);
     }
     public CharSequence subSequence(int start, int end){
+
         char[] buf = this.buffer;
         if (null != buf){
             int buflen = buf.length;
@@ -156,6 +186,7 @@ public final class ParserReader
             throw new IndexOutOfBoundsException(String.valueOf(start)+':'+String.valueOf(start)+":{0}");
     }
     public String toString(){
+
         char[] buf = this.buffer;
         if (null != buf)
             return new String(buf,0,buf.length);
@@ -164,6 +195,9 @@ public final class ParserReader
     }
 
     protected String lines(char[] re, int ofs, int len){
+
+        this.advance = 0;
+
         if (-1 == len)
             len = ((null != re)?(re.length):(0));
 

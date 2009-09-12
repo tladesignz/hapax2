@@ -70,6 +70,13 @@ public final class CTemplateParser
             if ('{' == input.charAt(0) && '{' == input.charAt(1)){
 
                 switch (input.charAt(2)){
+                case '{':
+                    do {
+                        input.next();
+                    }
+                    while ('{' == input.charAtTest(2));
+
+                    return NODE_TYPE.TEXT_NODE;
                 case '#':
                     return NODE_TYPE.OPEN_SECTION;
                 case '/':
