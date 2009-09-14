@@ -44,19 +44,20 @@ public final class IncludeNode
     public final void evaluate(TemplateDictionary dict, TemplateLoaderContext context, PrintWriter out)
         throws TemplateException
     {
-        String filename = this.resolveName(dict,context);
+        String sectionName = this.name;
 
-        if (this.acceptFile(dict,filename)){
-            /*
-             * Load template from resolved name
-             */
-            Template template = context.getLoader().getTemplate(filename);
+        List<TemplateDictionary> section = dict.getSection(sectionName);
 
-            String sectionName = this.name;
+        if (null != section){
 
-            List<TemplateDictionary> section = dict.getSection(sectionName);
+            String filename = this.resolveName(dict,context);
 
-            if (null != section){
+            if (this.acceptFile(dict,filename)){
+                /*
+                 * Load template from resolved name
+                 */
+                Template template = context.getLoader().getTemplate(filename);
+
                 /*
                  * Modified rendering
                  */
