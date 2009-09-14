@@ -185,7 +185,7 @@ public final class CTemplateParser
     {
         int lno = input.lineNumber();
         String consumed = parseClose(input);
-        String token = consumed.substring(3,consumed.length()-5).trim();
+        String token = consumed.substring(3,consumed.length()-2).trim();
         return (new IncludeNode(lno,token));
     }
     private static TemplateNode parseVariable(ParserReader input)
