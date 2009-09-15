@@ -106,11 +106,11 @@ public final class IncludeNode
         throws TemplateException
     {
         /*
-         * Detect cycles
+         * Detect cycles according to the scopes in the data dictionary tree
          */
         String warning_flag = "__already__included__" + filename;
         if (dict.containsVariable(warning_flag)) {
-            String msg = MessageFormat.format("loop detected in '{0}' for '{1}'", this.name, filename);
+            String msg = MessageFormat.format("loop detected in \"{0}\" for \"{1}\".", this.name, filename);
             throw new CyclicIncludeException(msg);
         }
         else {
