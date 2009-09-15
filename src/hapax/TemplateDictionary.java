@@ -107,6 +107,14 @@ public final class TemplateDictionary
 
         this.putVariable(varName, String.valueOf(val));
     }
+    public void setVariable(String varName, String val) {
+
+        this.variables.put(varName, val);
+    }
+    public void setVariable(String varName, int val) {
+
+        this.putVariable(varName, String.valueOf(val));
+    }
 
     /*
      * Section API
@@ -155,6 +163,14 @@ public final class TemplateDictionary
                 return null;
         }
     }
+    /**
+     * An aid to usage
+     * @param from Embedded section or include name
+     * @param to Target template name
+     */
+    public List<TemplateDictionary> getSection(String from, String to) {
+        return this.getSection(from);
+    }
     public TemplateDictionary addSection(String sectionName) {
 
         TemplateDictionary add = new TemplateDictionary(this);
@@ -167,6 +183,15 @@ public final class TemplateDictionary
 
         section.add(add);
         return add;
+    }
+    /**
+     * An aid to usage
+     * @param from Embedded section or include name
+     * @param to Target template name
+     */
+    public TemplateDictionary addSection(String from, String to) {
+        this.setVariable(from,to);
+        return this.addSection(from);
     }
     /**
      * @return A section data list having at least one section
@@ -183,9 +208,26 @@ public final class TemplateDictionary
         }
         return section;
     }
+    /**
+     * An aid to usage
+     * @param from Embedded section or include name
+     * @param to Target template name
+     */
+    public List<TemplateDictionary> showSection(String from, String to){
+
+        return this.showSection(from);
+    }
     public void hideSection(String sectionName) {
 
         this.sections.remove(sectionName);
     }
+    /**
+     * An aid to usage
+     * @param from Embedded section or include name
+     * @param to Target template name
+     */
+    public void hideSection(String from, String to){
 
+        this.sections.remove(from);
+    }
 }
