@@ -1,7 +1,9 @@
 package hapax;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The data dictionary contains the definition of variables, and
@@ -48,27 +50,41 @@ public final class TemplateDictionary
 
 
     /**
-     * Permits cloning a variable table, but prohibits cloning a
-     * dictionary with any more state.  This is intended as an aid to
-     * application configuration that raises exceptions on incorrect
-     * data flow.
+     * Called by template render.
      */
-    public TemplateDictionary clone(){
-        if (!this.sections.isEmpty())
-            throw new IllegalStateException("Unintended operation, dictionary has sections");
-        else if (null != this.parent)
-            throw new IllegalStateException("Unintended operation, dictionary is child");
-        else {
-            try {
-                TemplateDictionary clone = (TemplateDictionary)super.clone();
-                clone.variables = (HashMap<String, String>)this.variables.clone();
-                clone.sections = new HashMap<String, List<TemplateDictionary>>();
-                return clone;
-            }
-            catch (java.lang.CloneNotSupportedException exc){
-                throw new java.lang.Error(exc);
+    public void destroy(){
+        this.parent = null;
+        this.variables.clear();
+        for (List<TemplateDictionary> section : this.sections.values()){
+            for (TemplateDictionary child: section){
+                child.destroy();
             }
         }
+        this.sections.clear();
+    }
+    /**
+     * Deep clone
+     */
+    public TemplateDictionary clone(){
+        try {
+            TemplateDictionary clone = (TemplateDictionary)super.clone();
+            clone.variables = (HashMap<String, String>)this.variables.clone();
+            clone.sections = (HashMap<String, List<TemplateDictionary>>)this.sections.clone();
+            for (Map.Entry<String,List<TemplateDictionary>> entry : clone.sections.entrySet()){
+                List<TemplateDictionary> section = entry.getValue();
+                List<TemplateDictionary> sectionClone = SectionClone(clone,section);
+                entry.setValue(sectionClone);
+            }
+            return clone;
+        }
+        catch (java.lang.CloneNotSupportedException exc){
+            throw new java.lang.Error(exc);
+        }
+    }
+    private TemplateDictionary clone(TemplateDictionary parent){
+        TemplateDictionary clone = this.clone();
+        clone.parent = parent;
+        return clone;
     }
 
     /*
@@ -143,24 +159,15 @@ public final class TemplateDictionary
             return list;
         else {
             TemplateDictionary parent = this.parent;
-            if (null != parent)
-                /*
-                 * Permits {{>name01}} 
-                 *   containing {{#name01}} <section> {{/name01}}
-                 * 
-                 * to work when the section data is not
-                 * 
-                 *    (dictionary name01[1])/(dictionary name01[N]),
-                 * 
-                 * but only
-                 * 
-                 *    (dictionary name01[1]).
-                 * 
-                 * As for variables.
-                 */
-                return parent.getSection(sectionName);
-            else
-                return null;
+            if (null != parent){
+
+                List<TemplateDictionary> ancestor = parent.getSection(sectionName);
+                if (null != ancestor){
+
+                    return SectionClone(this,ancestor);
+                }
+            }
+            return null;
         }
     }
     /**
@@ -177,7 +184,7 @@ public final class TemplateDictionary
 
         List<TemplateDictionary> section = this.sections.get(sectionName);
         if (null == section){
-            section = new java.util.ArrayList<TemplateDictionary>();
+            section = new ArrayList<TemplateDictionary>();
             this.sections.put(sectionName, section);
         }
 
@@ -201,7 +208,7 @@ public final class TemplateDictionary
 
         List<TemplateDictionary> section = this.sections.get(sectionName);
         if (null == section){
-            section = new java.util.ArrayList<TemplateDictionary>();
+            section = new ArrayList<TemplateDictionary>();
             TemplateDictionary show = new TemplateDictionary(this);
             section.add(show);
             this.sections.put(sectionName, section);
@@ -229,5 +236,18 @@ public final class TemplateDictionary
     public void hideSection(String from, String to){
 
         this.sections.remove(from);
+    }
+
+    private final static List<TemplateDictionary> SectionClone(TemplateDictionary parent, List<TemplateDictionary> section){
+
+        List<TemplateDictionary> sectionClone = (List<TemplateDictionary>)((ArrayList<TemplateDictionary>)section).clone();
+
+        for (int sectionIndex = 0, sectionCount = sectionClone.size(); sectionIndex < sectionCount; sectionIndex++){
+            TemplateDictionary sectionItem = sectionClone.get(sectionIndex);
+            TemplateDictionary sectionItemClone = sectionItem.clone(parent);
+            sectionClone.set(sectionIndex,sectionItemClone);
+        }
+
+        return sectionClone;
     }
 }

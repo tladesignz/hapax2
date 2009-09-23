@@ -82,7 +82,7 @@ public final class Template
     {
         this.render(Top, this.template, dict, writer);
     }
-    public String renderToString(final TemplateDictionary dict)
+    public String renderToString(TemplateDictionary dict)
         throws TemplateException
     {
         StringWriter buffer = new StringWriter();
@@ -95,21 +95,26 @@ public final class Template
     private void render(int offset, List<TemplateNode> template, TemplateDictionary dict, PrintWriter writer)
         throws TemplateException
     {
-        for (int position = 0; position < template.size(); position++) {
+        try {
+            for (int position = 0; position < template.size(); position++) {
 
-            TemplateNode node = template.get(position);
+                TemplateNode node = template.get(position);
 
-            switch (node.getTemplateType()){
+                switch (node.getTemplateType()){
 
-            case TemplateTypeSection:
+                case TemplateTypeSection:
 
-                position = this.renderSectionNode(offset, template, dict, position, ((SectionNode)node), writer);
-                break;
+                    position = this.renderSectionNode(offset, template, dict, position, ((SectionNode)node), writer);
+                    break;
 
-            default:
-                node.evaluate(dict, this.context, writer);
-                break;
+                default:
+                    node.evaluate(dict, this.context, writer);
+                    break;
+                }
             }
+        }
+        finally {
+            dict.destroy();
         }
     }
     private int renderSectionNode(int offset, List<TemplateNode> template, TemplateDictionary dict, int open,
