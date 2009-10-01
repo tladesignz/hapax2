@@ -63,7 +63,7 @@ public final class TemplateDictionary
         this.sections.clear();
     }
     /**
-     * Deep clone
+     * Deep clone of dictionary carries parent.
      */
     public TemplateDictionary clone(){
         try {
@@ -81,10 +81,17 @@ public final class TemplateDictionary
             throw new java.lang.Error(exc);
         }
     }
+    /**
+     * Deep clone of child dictionary replaces parent.
+     */
     private TemplateDictionary clone(TemplateDictionary parent){
         TemplateDictionary clone = this.clone();
-        clone.parent = parent;
-        return clone;
+        if (null != parent){
+            clone.parent = parent;
+            return clone;
+        }
+        else
+            throw new IllegalStateException();
     }
 
     /*

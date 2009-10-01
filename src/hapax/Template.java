@@ -80,41 +80,46 @@ public final class Template
     public void render(TemplateDictionary dict, PrintWriter writer)
         throws TemplateException
     {
-        this.render(Top, this.template, dict, writer);
+        try {
+            this.render(Top, this.template, dict, writer);
+        }
+        finally {
+            dict.destroy();
+        }
     }
     public String renderToString(TemplateDictionary dict)
         throws TemplateException
     {
-        StringWriter buffer = new StringWriter();
+        try {
+            StringWriter buffer = new StringWriter();
 
-        this.render(Top, this.template, dict, (new PrintWriter(buffer)));
+            this.render(Top, this.template, dict, (new PrintWriter(buffer)));
 
-        return buffer.toString();
+            return buffer.toString();
+        }
+        finally {
+            dict.destroy();
+        }
     }
 
     private void render(int offset, List<TemplateNode> template, TemplateDictionary dict, PrintWriter writer)
         throws TemplateException
     {
-        try {
-            for (int position = 0; position < template.size(); position++) {
+        for (int position = 0, count = template.size(); position < count; position++) {
 
-                TemplateNode node = template.get(position);
+            TemplateNode node = template.get(position);
 
-                switch (node.getTemplateType()){
+            switch (node.getTemplateType()){
 
-                case TemplateTypeSection:
+            case TemplateTypeSection:
 
-                    position = this.renderSectionNode(offset, template, dict, position, ((SectionNode)node), writer);
-                    break;
+                position = this.renderSectionNode(offset, template, dict, position, ((SectionNode)node), writer);
+                break;
 
-                default:
-                    node.evaluate(dict, this.context, writer);
-                    break;
-                }
+            default:
+                node.evaluate(dict, this.context, writer);
+                break;
             }
-        }
-        finally {
-            dict.destroy();
         }
     }
     private int renderSectionNode(int offset, List<TemplateNode> template, TemplateDictionary dict, int open,
