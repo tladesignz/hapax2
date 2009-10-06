@@ -42,22 +42,15 @@ public class Iterator
     public final static void Define(TemplateDictionary dict, String sectionName, int cc, int count){
         if (0 == cc){
             dict.showSection(sectionName+Suffix.First);
-            dict.hideSection(sectionName+Suffix.NotFirst);
-            dict.hideSection(sectionName+Suffix.Last);
-            dict.showSection(sectionName+Suffix.NotLast);
-            dict.hideSection(sectionName+Suffix.Exclusive);
+            if (1 != count)
+                dict.showSection(sectionName+Suffix.NotLast);
         }
         else if (cc == (count-1)){
-            dict.hideSection(sectionName+Suffix.First);
             dict.showSection(sectionName+Suffix.NotFirst);
             dict.showSection(sectionName+Suffix.Last);
-            dict.hideSection(sectionName+Suffix.NotLast);
-            dict.hideSection(sectionName+Suffix.Exclusive);
         }
         else {
-            dict.hideSection(sectionName+Suffix.First);
             dict.showSection(sectionName+Suffix.NotFirst);
-            dict.hideSection(sectionName+Suffix.Last);
             dict.showSection(sectionName+Suffix.NotLast);
             dict.showSection(sectionName+Suffix.Exclusive);
         }
