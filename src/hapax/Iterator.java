@@ -42,7 +42,9 @@ public class Iterator
     public final static void Define(TemplateDictionary dict, String sectionName, int cc, int count){
         if (0 == cc){
             dict.showSection(sectionName+Suffix.First);
-            if (1 != count)
+            if (1 == count)
+                dict.showSection(sectionName+Suffix.Last);
+            else
                 dict.showSection(sectionName+Suffix.NotLast);
         }
         else if (cc == (count-1)){
