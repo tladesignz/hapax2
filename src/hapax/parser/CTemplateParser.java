@@ -45,7 +45,7 @@ public final class CTemplateParser
 
 
     private enum NODE_TYPE {
-        OPEN_SECTION, CLOSE_SECTION, VARIABLE, TEXT_NODE, INCLUDE_SECTION, END_INPUT ;
+        OPEN_SECTION, CLOSE_SECTION, VARIABLE, TEXT_NODE, INCLUDE_SECTION, COMMENT, END_INPUT ;
     }
 
 
@@ -85,6 +85,8 @@ public final class CTemplateParser
                     return NODE_TYPE.INCLUDE_SECTION;
                 case '=':
                     return NODE_TYPE.VARIABLE;
+                case '!':
+                    return NODE_TYPE.COMMENT;
                 default:
                     return NODE_TYPE.VARIABLE;
                 }
@@ -115,6 +117,9 @@ public final class CTemplateParser
                 break;
             case INCLUDE_SECTION:
                 node = parseInclude(input);
+                break;
+            case COMMENT:
+                node = parseComment(input);
                 break;
 
             case END_INPUT:
@@ -215,6 +220,14 @@ public final class CTemplateParser
         String consumed = parseClose(input);
         String token = consumed.substring(3,consumed.length()-2).trim();
         return (SectionNode.Open(lno,token));
+    }
+    private static TemplateNode parseComment(ParserReader input)
+        throws TemplateParserException
+    {
+        int lno = input.lineNumber();
+        String consumed = parseClose(input);
+        String token = consumed.substring(3,consumed.length()-2).trim();
+        return (new CommentNode(lno,token));
     }
 
     private static String parseClose(ParserReader input)
