@@ -53,47 +53,50 @@ public final class IncludeNode
             String filename = this.resolveName(dict);
 
             Template template = context.getTemplate(filename);
-
-            /*
-             * Modified rendering
-             */
-            PrintWriter previous_printwriter = null;
-            StringWriter sw = null;
-            if (!this.modifiers.isEmpty()) {
-                previous_printwriter = out;
-                sw = new StringWriter();
-                out = new PrintWriter(sw);
-            }
-
-            if (section.size() == 0) {
-
-                Iterator.Define(dict,sectionName,0,1);
+            if (null != template){
                 /*
-                 * Once
+                 * Modified rendering
                  */
-                template.render(dict, out);
-            }
-            else {
+                PrintWriter previous_printwriter = null;
+                StringWriter sw = null;
+                if (!this.modifiers.isEmpty()) {
+                    previous_printwriter = out;
+                    sw = new StringWriter();
+                    out = new PrintWriter(sw);
+                }
+
+                if (section.size() == 0) {
+
+                    Iterator.Define(dict,sectionName,0,1);
+                    /*
+                     * Once
+                     */
+                    template.render(dict, out);
+                }
+                else {
+                    /*
+                     * Repeat
+                     */
+                    for (int cc = 0, count = section.size(); cc < count; cc++){
+
+                        TemplateDictionary child = section.get(cc);
+
+                        Iterator.Define(child,sectionName,cc,count);
+
+                        template.render(child, out);
+                    }
+                }
+
                 /*
-                 * Repeat
                  */
-                for (int cc = 0, count = section.size(); cc < count; cc++){
-
-                    TemplateDictionary child = section.get(cc);
-
-                    Iterator.Define(child,sectionName,cc,count);
-
-                    template.render(child, out);
+                if (previous_printwriter != null) {
+                    String results = sw.toString();
+                    out = previous_printwriter;
+                    out.write(Modifiers.applyModifiers(results, this.modifiers));
                 }
             }
-
-            /*
-             */
-            if (previous_printwriter != null) {
-                String results = sw.toString();
-                out = previous_printwriter;
-                out.write(Modifiers.applyModifiers(results, this.modifiers));
-            }
+            else
+                throw new TemplateException("Template not found '"+filename+"'.");
         }
     }
 
