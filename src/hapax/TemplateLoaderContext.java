@@ -8,34 +8,35 @@ package hapax;
  * @author dcoker 
  * @author jdp
  */
-public class TemplateLoaderContext {
+public interface TemplateLoaderContext {
 
-    private final TemplateLoader loader;
-    private final String template_directory;
-    private final boolean isfile;
+    public class Simple
+        extends Object
+        implements TemplateLoaderContext
+    {
 
-
-    public TemplateLoaderContext(TemplateLoader loader, String template_directory){
-        super();
-        this.loader = loader;
-        this.template_directory = template_directory;
-        this.isfile = true;
-    }
-    public TemplateLoaderContext(TemplateLoader loader, String template_directory, boolean isf){
-        super();
-        this.loader = loader;
-        this.template_directory = template_directory;
-        this.isfile = isf;
-    }
+        private final TemplateLoader loader;
+        private final String template_directory;
 
 
-    public boolean isFile(){
-        return this.isfile;
+        public Simple(TemplateLoader loader, String template_directory){
+            super();
+            this.loader = loader;
+            this.template_directory = template_directory;
+        }
+
+
+        public TemplateLoader getLoader() {
+            return loader;
+        }
+        public String getTemplateDirectory() {
+            return template_directory;
+        }
     }
-    public TemplateLoader getLoader() {
-        return loader;
-    }
-    public String getTemplateDirectory() {
-        return template_directory;
-    }
+
+
+    public TemplateLoader getLoader();
+
+    public String getTemplateDirectory();
+
 }

@@ -41,11 +41,11 @@ public class TemplateCache
     }
 
 
-    private final Map<String, Template> cache = new HashMap<String, Template>();
+    protected final Map<String, Template> cache = new HashMap<String, Template>();
 
-    private final String baseDir;
+    protected final String baseDir;
 
-    private final TemplateParser parser;
+    protected final TemplateParser parser;
 
 
     public TemplateCache(String baseDir){
@@ -101,7 +101,7 @@ public class TemplateCache
     {
         String parent = Parent(url);
 
-        TemplateLoaderContext context = new TemplateLoaderContext(this, parent, false);
+        TemplateLoaderContext context = new TemplateLoaderContext.Simple(this, parent);
 
         String contents;
 
@@ -133,7 +133,7 @@ public class TemplateCache
     protected Template read(File file, long fileLast)
         throws TemplateException
     {
-        TemplateLoaderContext context = new TemplateLoaderContext(this, file.getParent());
+        TemplateLoaderContext context = new TemplateLoaderContext.Simple(this, file.getParent());
 
         String contents;
 

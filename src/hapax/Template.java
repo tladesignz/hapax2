@@ -37,8 +37,7 @@ public final class Template
 
     private final long lastModified;
     private final List<TemplateNode> template;
-    private TemplateLoader loader;
-    private TemplateLoaderContext context;
+    private final TemplateLoaderContext context;
 
 
     public Template(String template, TemplateLoaderContext context)
@@ -66,7 +65,6 @@ public final class Template
         this.lastModified = lastModified;
         this.template = tmpl;
         this.context = context;
-        this.loader = context.getLoader();
     }
 
 
