@@ -106,7 +106,7 @@ public class TemplateCache
     {
         String parent = Parent(url);
 
-        TemplateLoader context = new TemplateLoader.Scope(this, parent);
+        TemplateLoader context = new TemplateLoader.Context(this, parent);
 
         String contents;
 
@@ -138,7 +138,7 @@ public class TemplateCache
     protected Template read(File file, long fileLast)
         throws TemplateException
     {
-        TemplateLoader context = new TemplateLoader.Scope(this, file.getParent());
+        TemplateLoader context = new TemplateLoader.Context(this, file.getParent());
 
         String contents;
 
