@@ -3,7 +3,7 @@ package hapax.parser;
 import hapax.Modifiers;
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
-import hapax.TemplateLoaderContext;
+import hapax.TemplateLoader;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -41,7 +41,7 @@ public final class VariableNode
 
 
     @Override
-    public void evaluate(TemplateDictionary dict, TemplateLoaderContext context,
+    public void evaluate(TemplateDictionary dict, TemplateLoader context,
                          PrintWriter out)
     {
         String t = dict.getVariable(variable);

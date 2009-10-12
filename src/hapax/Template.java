@@ -27,7 +27,7 @@ public final class Template
     /**
      * Parse and render a C template.
      */
-    public final static String Eval(TemplateLoaderContext context, TemplateDictionary dict, String source)
+    public final static String Eval(TemplateLoader context, TemplateDictionary dict, String source)
         throws TemplateException
     {
         Template template = new Template(CTemplateParser.Instance,source,context);
@@ -37,30 +37,30 @@ public final class Template
 
     private final long lastModified;
     private final List<TemplateNode> template;
-    private final TemplateLoaderContext context;
+    private final TemplateLoader context;
 
 
-    public Template(String template, TemplateLoaderContext context)
+    public Template(String template, TemplateLoader context)
         throws TemplateException
     {
         this(0L,template,context);
     }
-    public Template(long lastModified, String template, TemplateLoaderContext context)
+    public Template(long lastModified, String template, TemplateLoader context)
         throws TemplateException
     {
         this(lastModified, CTemplateParser.Instance, template, context);
     }
-    public Template(TemplateParser parser, String template, TemplateLoaderContext context)
+    public Template(TemplateParser parser, String template, TemplateLoader context)
         throws TemplateException
     {
         this(0L, parser, template, context);
     }
-    public Template(long lastModified, TemplateParser parser, String template, TemplateLoaderContext context)
+    public Template(long lastModified, TemplateParser parser, String template, TemplateLoader context)
         throws TemplateException
     {
         this(lastModified, parser.parse(context,template), context);
     }
-    private Template(long lastModified, List<TemplateNode> tmpl, TemplateLoaderContext context) {
+    private Template(long lastModified, List<TemplateNode> tmpl, TemplateLoader context) {
         super();
         this.lastModified = lastModified;
         this.template = tmpl;

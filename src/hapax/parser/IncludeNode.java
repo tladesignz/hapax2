@@ -6,7 +6,7 @@ import hapax.Path;
 import hapax.Template;
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
-import hapax.TemplateLoaderContext;
+import hapax.TemplateLoader;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -14,7 +14,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 /**
- * Represents an {{> include token.
+ * Represents an <code>{{&gt;<i>name</i>}}</code> include section.
  *
  * @author dcoker
  * @author jdp
@@ -41,7 +41,7 @@ public final class IncludeNode
         return this.name;
     }
     @Override
-    public final void evaluate(TemplateDictionary dict, TemplateLoaderContext context, PrintWriter out)
+    public final void evaluate(TemplateDictionary dict, TemplateLoader context, PrintWriter out)
         throws TemplateException
     {
         String sectionName = this.name;
@@ -50,104 +50,78 @@ public final class IncludeNode
 
         if (null != section){
 
-            String filename = this.resolveName(dict,context);
+            String filename = this.resolveName(dict);
 
-            if (this.acceptFile(dict,filename)){
+            Template template = context.getTemplate(filename);
+
+            /*
+             * Modified rendering
+             */
+            PrintWriter previous_printwriter = null;
+            StringWriter sw = null;
+            if (!this.modifiers.isEmpty()) {
+                previous_printwriter = out;
+                sw = new StringWriter();
+                out = new PrintWriter(sw);
+            }
+
+            if (section.size() == 0) {
+
+                Iterator.Define(dict,sectionName,0,1);
                 /*
-                 * Load template from resolved name
+                 * Once
                  */
-                Template template = context.getLoader().getTemplate(filename);
-
+                template.render(dict, out);
+            }
+            else {
                 /*
-                 * Modified rendering
+                 * Repeat
                  */
-                PrintWriter previous_printwriter = null;
-                StringWriter sw = null;
-                if (!this.modifiers.isEmpty()) {
-                    previous_printwriter = out;
-                    sw = new StringWriter();
-                    out = new PrintWriter(sw);
+                for (int cc = 0, count = section.size(); cc < count; cc++){
+
+                    TemplateDictionary child = section.get(cc);
+
+                    Iterator.Define(child,sectionName,cc,count);
+
+                    template.render(child, out);
                 }
+            }
 
-                if (section.size() == 0) {
-
-                    Iterator.Define(dict,sectionName,0,1);
-                    /*
-                     * Once
-                     */
-                    template.render(dict, out);
-                }
-                else {
-                    /*
-                     * Repeat
-                     */
-                    for (int cc = 0, count = section.size(); cc < count; cc++){
-
-                        TemplateDictionary child = section.get(cc);
-
-                        Iterator.Define(child,sectionName,cc,count);
-
-                        template.render(child, out);
-                    }
-                }
-
-                /*
-                 */
-                if (previous_printwriter != null) {
-                    String results = sw.toString();
-                    out = previous_printwriter;
-                    out.write(Modifiers.applyModifiers(results, this.modifiers));
-                }
+            /*
+             */
+            if (previous_printwriter != null) {
+                String results = sw.toString();
+                out = previous_printwriter;
+                out.write(Modifiers.applyModifiers(results, this.modifiers));
             }
         }
     }
 
-    protected boolean acceptFile(TemplateDictionary dict, String filename)
-        throws TemplateException
-    {
-        /*
-         * Detect cycles according to the scopes in the data dictionary tree
-         */
-        String warning_flag = "__already__included__" + filename;
-        if (dict.containsVariable(warning_flag)) {
-            String msg = MessageFormat.format("loop detected in \"{0}\" for \"{1}\".", this.name, filename);
-            throw new CyclicIncludeException(msg);
-        }
-        else {
-            dict.putVariable(warning_flag, "");
-            return true;
-        }
-    }
-
-    protected final String resolveName(TemplateDictionary dict, TemplateLoaderContext context)
+    private String resolveName(TemplateDictionary dict)
         throws TemplateException
     {
         String name = this.name;
         /*
-         * When it's quoted, it's protected from a redirect via the
-         * variable map.
+         * When it's quoted, it's protected from redirect
          */
         String basename = TrimQuotes(name);
 
         if (name == basename){
-            /*
-             * If it's not quoted, look it up for a redirect
-             */
+
             String redirect = dict.getVariable(name);
 
             if (null != redirect && 0 != redirect.length())
-                basename = redirect;
+                return redirect;
         }
-
-        return Path.toFile(context.getTemplateDirectory(), basename);
+        return basename;
     }
 
-    protected final static String TrimQuotes(String string){
+    private final static String TrimQuotes(String string){
 
         if ('"' == string.charAt(0)) {
             int stringLen = string.length();
             if ('"' == string.charAt(stringLen-1))
-                string = string.substring(1,stringLen-2);
+                string = string.substring(1,stringLen-1);
             else
                 string = string.substring(1);
         } 

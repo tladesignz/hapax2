@@ -1,7 +1,7 @@
 package hapax.parser;
 
 import hapax.TemplateDictionary;
-import hapax.TemplateLoaderContext;
+import hapax.TemplateLoader;
 
 import java.io.PrintWriter;
 
@@ -49,7 +49,7 @@ public final class SectionNode
     }
 
     @Override
-    public void evaluate(TemplateDictionary dict, TemplateLoaderContext context,
+    public void evaluate(TemplateDictionary dict, TemplateLoader context,
                          PrintWriter collector)
     {
         // do nothing

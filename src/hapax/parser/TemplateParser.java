@@ -1,6 +1,6 @@
 package hapax.parser;
 
-import hapax.TemplateLoaderContext;
+import hapax.TemplateLoader;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface TemplateParser {
 
-    public List<TemplateNode> parse(TemplateLoaderContext context, String template) 
+    public List<TemplateNode> parse(TemplateLoader context, String template) 
         throws TemplateParserException;
 
 }

@@ -2,7 +2,7 @@ package hapax.parser;
 
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
-import hapax.TemplateLoaderContext;
+import hapax.TemplateLoader;
 
 import java.io.PrintWriter;
 
@@ -44,7 +44,7 @@ public abstract class TemplateNode {
     public TemplateType getTemplateType(){
         return TemplateType.TemplateTypeNode;
     }
-    public void evaluate(TemplateDictionary dict, TemplateLoaderContext context,
+    public void evaluate(TemplateDictionary dict, TemplateLoader context,
                          PrintWriter collector) 
         throws TemplateException 
     {

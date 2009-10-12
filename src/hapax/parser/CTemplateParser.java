@@ -3,7 +3,7 @@ package hapax.parser;
 import hapax.Template;
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
-import hapax.TemplateLoaderContext;
+import hapax.TemplateLoader;
 import static hapax.parser.TemplateNode.TemplateType.*;
 
 import java.text.MessageFormat;
@@ -30,14 +30,14 @@ public final class CTemplateParser
     /**
      * Parse and render a C template.
      */
-    public final static String Eval(TemplateLoaderContext context, TemplateDictionary dict, String sourcecode)
+    public final static String Eval(TemplateLoader context, TemplateDictionary dict, String sourcecode)
         throws TemplateException
     {
         Template template = new Template(Instance,sourcecode,context);
         return template.renderToString(dict);
     }
 
-    final static List<TemplateNode> Parse(TemplateLoaderContext context, String template)
+    final static List<TemplateNode> Parse(TemplateLoader context, String template)
         throws TemplateParserException
     {
         return Instance.parse(context,template);
@@ -95,7 +95,7 @@ public final class CTemplateParser
         }
     }
 
-    public List<TemplateNode> parse(TemplateLoaderContext context, String template)
+    public List<TemplateNode> parse(TemplateLoader context, String template)
         throws TemplateParserException
     {
         List<TemplateNode> list = new java.util.ArrayList<TemplateNode>();
