@@ -95,8 +95,6 @@ public final class IncludeNode
                     out.write(Modifiers.applyModifiers(results, this.modifiers));
                 }
             }
-            else
-                throw new TemplateException("Template not found '"+filename+"'.");
         }
     }
 
