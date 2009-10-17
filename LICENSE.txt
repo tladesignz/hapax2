@@ -4,6 +4,7 @@ third-party libraries (such as JUnit) that may be included.
 The MIT License
 
 Copyright (c) 2007 Doug Coker
+Copyright (c) 2009 John Pritchard
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
