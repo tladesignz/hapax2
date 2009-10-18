@@ -1,10 +1,8 @@
-The following license applies to all content in this distrubtion except for any
-third-party libraries (such as JUnit) that may be included.
-
-The MIT License
-
+Hapax2
 Copyright (c) 2007 Doug Coker
 Copyright (c) 2009 John Pritchard
+
+The MIT License
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
