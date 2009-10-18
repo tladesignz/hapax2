@@ -34,8 +34,6 @@ import static hapax.parser.TemplateNode.TemplateType.*;
 import java.text.MessageFormat;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This parser turns strings containing the contents of a template into a list
