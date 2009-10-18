@@ -26,7 +26,7 @@
 package hapax.parser;
 
 import hapax.Template;
-import hapax.TemplateDictionary;
+import hapax.TemplateDataDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
 import static hapax.parser.TemplateNode.TemplateType.*;
@@ -55,7 +55,7 @@ public final class CTemplateParser
     /**
      * Parse and render a C template.
      */
-    public final static String Eval(TemplateLoader context, TemplateDictionary dict, String sourcecode)
+    public final static String Eval(TemplateLoader context, TemplateDataDictionary dict, String sourcecode)
         throws TemplateException
     {
         Template template = new Template(Instance,sourcecode,context);

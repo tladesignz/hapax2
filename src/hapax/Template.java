@@ -52,7 +52,7 @@ public final class Template
     /**
      * Parse and render a C template.
      */
-    public final static String Eval(TemplateLoader context, TemplateDictionary dict, String source)
+    public final static String Eval(TemplateLoader context, TemplateDataDictionary dict, String source)
         throws TemplateException
     {
         Template template = new Template(CTemplateParser.Instance,source,context);
@@ -100,17 +100,17 @@ public final class Template
         return this.lastModified;
     }
 
-    public void render(TemplateDictionary dict, PrintWriter writer)
+    public void render(TemplateDataDictionary dict, PrintWriter writer)
         throws TemplateException
     {
         try {
             this.render(Top, this.template, dict, writer);
         }
         finally {
-            dict.destroy();
+            dict.renderComplete();
         }
     }
-    public String renderToString(TemplateDictionary dict)
+    public String renderToString(TemplateDataDictionary dict)
         throws TemplateException
     {
         try {
@@ -121,11 +121,11 @@ public final class Template
             return buffer.toString();
         }
         finally {
-            dict.destroy();
+            dict.renderComplete();
         }
     }
 
-    private void render(int offset, List<TemplateNode> template, TemplateDictionary dict, PrintWriter writer)
+    private void render(int offset, List<TemplateNode> template, TemplateDataDictionary dict, PrintWriter writer)
         throws TemplateException
     {
         for (int position = 0, count = template.size(); position < count; position++) {
@@ -145,7 +145,7 @@ public final class Template
             }
         }
     }
-    private int renderSectionNode(int offset, List<TemplateNode> template, TemplateDictionary dict, int open,
+    private int renderSectionNode(int offset, List<TemplateNode> template, TemplateDataDictionary dict, int open,
                                   SectionNode section, PrintWriter writer)
         throws TemplateException
     {
@@ -156,7 +156,7 @@ public final class Template
 
             String sectionName = section.getSectionName();
 
-            List<TemplateDictionary> data = dict.getSection(sectionName);
+            List<TemplateDataDictionary> data = dict.getSection(sectionName);
 
             if (null != data){
 
@@ -174,7 +174,7 @@ public final class Template
                      */
                     for (int cc = 0, count = data.size(); cc < count; cc++){
 
-                        TemplateDictionary child = data.get(cc);
+                        TemplateDataDictionary child = data.get(cc);
 
                         Iterator.Define(child,sectionName,cc,count);
 

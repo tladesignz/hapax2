@@ -29,7 +29,7 @@ import hapax.Iterator;
 import hapax.Modifiers;
 import hapax.Path;
 import hapax.Template;
-import hapax.TemplateDictionary;
+import hapax.TemplateDataDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
 
@@ -66,12 +66,12 @@ public final class IncludeNode
         return this.name;
     }
     @Override
-    public final void evaluate(TemplateDictionary dict, TemplateLoader context, PrintWriter out)
+    public final void evaluate(TemplateDataDictionary dict, TemplateLoader context, PrintWriter out)
         throws TemplateException
     {
         String sectionName = this.name;
 
-        List<TemplateDictionary> section = dict.getSection(sectionName);
+        List<TemplateDataDictionary> section = dict.getSection(sectionName);
 
         if (null != section){
 
@@ -104,7 +104,7 @@ public final class IncludeNode
                      */
                     for (int cc = 0, count = section.size(); cc < count; cc++){
 
-                        TemplateDictionary child = section.get(cc);
+                        TemplateDataDictionary child = section.get(cc);
 
                         Iterator.Define(child,sectionName,cc,count);
 
@@ -123,7 +123,7 @@ public final class IncludeNode
         }
     }
 
-    private String resolveName(TemplateDictionary dict)
+    private String resolveName(TemplateDataDictionary dict)
         throws TemplateException
     {
         String name = this.name;

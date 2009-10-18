@@ -25,7 +25,7 @@
  */
 package hapax.parser;
 
-import hapax.TemplateDictionary;
+import hapax.TemplateDataDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
 
@@ -69,7 +69,7 @@ public abstract class TemplateNode {
     public TemplateType getTemplateType(){
         return TemplateType.TemplateTypeNode;
     }
-    public void evaluate(TemplateDictionary dict, TemplateLoader context,
+    public void evaluate(TemplateDataDictionary dict, TemplateLoader context,
                          PrintWriter collector) 
         throws TemplateException 
     {

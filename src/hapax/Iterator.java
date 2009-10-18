@@ -64,7 +64,7 @@ public class Iterator
         public final static String Exclusive = "_it_Exclusive";
     }
 
-    public final static void Define(TemplateDictionary dict, String sectionName, int cc, int count){
+    public final static void Define(TemplateDataDictionary dict, String sectionName, int cc, int count){
         if (0 == cc){
             dict.showSection(sectionName+Suffix.First);
             if (1 == count)

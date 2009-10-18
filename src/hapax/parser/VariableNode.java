@@ -26,7 +26,7 @@
 package hapax.parser;
 
 import hapax.Modifiers;
-import hapax.TemplateDictionary;
+import hapax.TemplateDataDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
 
@@ -35,7 +35,7 @@ import java.util.List;
 
 /**
  * Represents a node whose output is defined by a value from the
- * TemplateDictionary.
+ * TemplateDataDictionary.
  *
  * This supports both {{PLAIN}} variables as well as one with {{MODIFERS:j}}.
  * The modifiers themselves are implemented in {@link Modifiers}.
@@ -66,7 +66,7 @@ public final class VariableNode
 
 
     @Override
-    public void evaluate(TemplateDictionary dict, TemplateLoader context,
+    public void evaluate(TemplateDataDictionary dict, TemplateLoader context,
                          PrintWriter out)
     {
         String t = dict.getVariable(variable);
