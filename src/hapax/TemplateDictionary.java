@@ -43,7 +43,7 @@ import java.util.Map;
  * @author dcoker
  * @author jdp
  */
-public final class TemplateDictionary
+public class TemplateDictionary
     extends Object
     implements TemplateDataDictionary
 {
@@ -58,17 +58,17 @@ public final class TemplateDictionary
     }
 
 
-    private HashMap<String, String> variables = new HashMap<String, String>();
+    protected HashMap<String, String> variables = new HashMap<String, String>();
 
-    private HashMap<String, List<TemplateDataDictionary>> sections = new HashMap<String, List<TemplateDataDictionary>>();
+    protected HashMap<String, List<TemplateDataDictionary>> sections = new HashMap<String, List<TemplateDataDictionary>>();
 
-    private TemplateDataDictionary parent;
+    protected TemplateDataDictionary parent;
 
 
     public TemplateDictionary() {
         super();
     }
-    private TemplateDictionary(TemplateDataDictionary parent) {
+    protected TemplateDictionary(TemplateDataDictionary parent) {
         super();
         this.parent = parent;
     }
@@ -153,7 +153,7 @@ public final class TemplateDictionary
 
         this.variables.put(varName, val);
     }
-    public void setVariable(String varName, int val) {
+    public final void setVariable(String varName, int val) {
 
         this.setVariable(varName, String.valueOf(val));
     }
@@ -162,14 +162,6 @@ public final class TemplateDictionary
      * Section API
      */
 
-    public boolean isSectionHidden(String sectionName) {
-
-        return (!this.sections.containsKey(sectionName));
-    }
-    public boolean isSectionVisible(String sectionName) {
-
-        return (this.sections.containsKey(sectionName));
-    }
     public boolean hasNotSection(String sectionName){
 
         return (!this.sections.containsKey(sectionName));
@@ -218,16 +210,16 @@ public final class TemplateDictionary
      * @param from Embedded section or include name
      * @param to Target template name
      */
-    public List<TemplateDataDictionary> getSection(String from, String to) {
+    public final List<TemplateDataDictionary> getSection(String from, String to) {
         return this.getSection(from);
     }
-    public TemplateDataDictionary addSectionExclusive(String of, String sectionName){
+    public final TemplateDataDictionary addSectionExclusive(String of, String sectionName){
         if (this.hasNotSection(of))
             return this.addSection(sectionName);
         else
             return null;
     }
-    public TemplateDataDictionary addSectionExclusive(String of, String from, String to){
+    public final TemplateDataDictionary addSectionExclusive(String of, String from, String to){
         if (this.hasNotSection(of))
             return this.addSection(from,to);
         else
@@ -251,7 +243,7 @@ public final class TemplateDictionary
      * @param from Embedded section or include name
      * @param to Target template name
      */
-    public TemplateDataDictionary addSection(String from, String to) {
+    public final TemplateDataDictionary addSection(String from, String to) {
         this.setVariable(from,to);
         return this.addSection(from);
     }
@@ -275,8 +267,8 @@ public final class TemplateDictionary
      * @param from Embedded section or include name
      * @param to Target template name
      */
-    public List<TemplateDataDictionary> showSection(String from, String to){
-
+    public final List<TemplateDataDictionary> showSection(String from, String to){
+        this.setVariable(from,to);
         return this.showSection(from);
     }
     public void hideSection(String sectionName) {
@@ -293,7 +285,7 @@ public final class TemplateDictionary
         this.sections.remove(from);
     }
 
-    private final static List<TemplateDataDictionary> SectionClone(TemplateDataDictionary parent, List<TemplateDataDictionary> section){
+    public final static List<TemplateDataDictionary> SectionClone(TemplateDataDictionary parent, List<TemplateDataDictionary> section){
 
         List<TemplateDataDictionary> sectionClone = (List<TemplateDataDictionary>)((ArrayList<TemplateDataDictionary>)section).clone();
 
