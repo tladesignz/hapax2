@@ -57,7 +57,7 @@ public class Name
 
         public Component(String source){
             super();
-            StringTokenizer strtok = new StringTokenizer(source,":][");
+            StringTokenizer strtok = new StringTokenizer(source,"][");
             switch (strtok.countTokens()){
             case 1:
                 this.component = strtok.nextToken();
