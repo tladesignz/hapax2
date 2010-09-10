@@ -26,7 +26,7 @@
 package hapax;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,9 +58,9 @@ public class TemplateDictionary
     }
 
 
-    protected HashMap<String, String> variables = new HashMap<String, String>();
+    protected LinkedHashMap<String, String> variables = new LinkedHashMap<String, String>();
 
-    protected HashMap<String, List<TemplateDataDictionary>> sections = new HashMap<String, List<TemplateDataDictionary>>();
+    protected LinkedHashMap<String, List<TemplateDataDictionary>> sections = new LinkedHashMap<String, List<TemplateDataDictionary>>();
 
     protected TemplateDataDictionary parent;
 
@@ -96,8 +96,8 @@ public class TemplateDictionary
     public TemplateDataDictionary clone(){
         try {
             TemplateDictionary clone = (TemplateDictionary)super.clone();
-            clone.variables = (HashMap<String, String>)this.variables.clone();
-            clone.sections = (HashMap<String, List<TemplateDataDictionary>>)this.sections.clone();
+            clone.variables = (LinkedHashMap<String, String>)this.variables.clone();
+            clone.sections = (LinkedHashMap<String, List<TemplateDataDictionary>>)this.sections.clone();
             for (Map.Entry<String,List<TemplateDataDictionary>> entry : clone.sections.entrySet()){
                 List<TemplateDataDictionary> section = entry.getValue();
                 List<TemplateDataDictionary> sectionClone = SectionClone(clone,section);

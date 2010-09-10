@@ -33,7 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -46,7 +46,7 @@ import java.util.Map;
  * @author Alan Stewart (alankstewart@gmail.com)
  */
 public class TemplateResourceLoader implements TemplateLoader {
-	private static final Map<String, Template> cache = new HashMap<String, Template>();
+	private static final Map<String, Template> cache = new LinkedHashMap<String, Template>();
 	protected final String baseDir;
 	protected final TemplateParser parser;
 

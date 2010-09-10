@@ -26,17 +26,17 @@
 package hapax;
 
 import hapax.parser.TemplateParser;
-import hapax.parser.CTemplateParser;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import javax.xml.transform.Templates;
 
 /**
  * An in-memory cache of parsed {@link Templates} intended to be
@@ -66,7 +66,7 @@ public class TemplateCache
     }
 
 
-    protected final Map<String, Template> cache = new HashMap<String, Template>();
+    protected final Map<String, Template> cache = new LinkedHashMap<String, Template>();
 
     protected final String baseDir;
 
