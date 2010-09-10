@@ -1,7 +1,8 @@
 /*
- * Hapax2
+ * Hapax2 Resource Loader
  * Copyright (c) 2007 Doug Coker
  * Copyright (c) 2009 John Pritchard
+ * Copyright (c) 2010 Alan Stewart
  * 
  * The MIT License
  *  
