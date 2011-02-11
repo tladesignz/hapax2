@@ -3,7 +3,7 @@
 
   <tstamp/>
 
-  <property name="version" value="2.3.4"/>
+  <property name="version" value="2.3.5"/>
 
   <property name="compiler.src" value="1.6"/>
   <property name="compiler.tgt" value="1.6"/>

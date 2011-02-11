@@ -95,6 +95,8 @@ public class TemplateResourceLoader implements TemplateLoader {
 
 		InputStream is = getClass().getClassLoader().getResourceAsStream(templatePath);
 		if (is == null) {
+		    is = getClass().getClassLoader().getResourceAsStream(resource);
+		    if (null == is)
 			throw new TemplateException("Template " + templatePath + " could not be found");
 		}
 		
