@@ -188,7 +188,16 @@ public class TemplateDictionary
 
                 List<TemplateDataDictionary> ancestor = parent.getSection(sectionName);
                 if (null != ancestor){
-
+                    /*
+                     * Section graph cloning from parent into children, as
+                     * 
+                     *     A - B - C
+                     *     _________
+                     *         |
+                     * 
+                     * A - B - C - B' - C'
+                     * 
+                     */
                     ancestor = SectionClone(this,ancestor);
 
                     this.sections.put(sectionName,ancestor);
