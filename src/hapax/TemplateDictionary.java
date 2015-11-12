@@ -2,19 +2,19 @@
  * Hapax2
  * Copyright (c) 2007 Doug Coker
  * Copyright (c) 2009 John Pritchard
- * 
+ *
  * The MIT License
- *  
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,22 +31,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The data dictionary contains the definition of variables, and
- * controls the interpretation of includes and sections.
- * 
- * An include or section that is visible (defined) enters the scope of
- * a child dictionary.  
- * 
- * The child scope of an include or section inherits and overrides the
- * data definitions of variables and sections from its ancestors.
- * 
+ * The data dictionary contains the definition of variables, and controls the
+ * interpretation of includes and sections. An include or section that is
+ * visible (defined) enters the scope of a child dictionary. The child scope of
+ * an include or section inherits and overrides the data definitions of
+ * variables and sections from its ancestors.
+ *
  * @author dcoker
  * @author jdp
  */
 public class TemplateDictionary
-    extends Object
-    implements TemplateDataDictionary
-{
+
+    implements TemplateDataDictionary {
 
     /**
      * Creates a top-level TemplateDictionary.
@@ -57,68 +53,74 @@ public class TemplateDictionary
         return new TemplateDictionary();
     }
 
-
     protected LinkedHashMap<String, String> variables = new LinkedHashMap<String, String>();
 
     protected LinkedHashMap<String, List<TemplateDataDictionary>> sections = new LinkedHashMap<String, List<TemplateDataDictionary>>();
 
     protected TemplateDataDictionary parent;
 
-
     public TemplateDictionary() {
         super();
     }
+
     protected TemplateDictionary(TemplateDataDictionary parent) {
         super();
         this.parent = parent;
     }
 
-
-    public TemplateDataDictionary getParent(){
+    @Override
+    public TemplateDataDictionary getParent() {
         return this.parent;
     }
+
     /**
      * Called by template render.
      */
-    public void renderComplete(){
+    @Override
+    public void renderComplete() {
         this.parent = null;
         this.variables.clear();
-        for (List<TemplateDataDictionary> section : this.sections.values()){
-            for (TemplateDataDictionary child: section){
+        for (List<TemplateDataDictionary> section : this.sections.values()) {
+            for (TemplateDataDictionary child : section) {
                 child.renderComplete();
             }
         }
         this.sections.clear();
     }
+
     /**
      * Deep clone of dictionary carries parent.
      */
-    public TemplateDataDictionary clone(){
+    @SuppressWarnings("unchecked")
+    @Override
+    public TemplateDataDictionary clone() {
         try {
-            TemplateDictionary clone = (TemplateDictionary)super.clone();
-            clone.variables = (LinkedHashMap<String, String>)this.variables.clone();
-            clone.sections = (LinkedHashMap<String, List<TemplateDataDictionary>>)this.sections.clone();
-            for (Map.Entry<String,List<TemplateDataDictionary>> entry : clone.sections.entrySet()){
+            TemplateDictionary clone = (TemplateDictionary) super.clone();
+            clone.variables = (LinkedHashMap<String, String>) this.variables.clone();
+            clone.sections = (LinkedHashMap<String, List<TemplateDataDictionary>>) this.sections
+                .clone();
+            for (Map.Entry<String, List<TemplateDataDictionary>> entry : clone.sections
+                .entrySet()) {
                 List<TemplateDataDictionary> section = entry.getValue();
-                List<TemplateDataDictionary> sectionClone = SectionClone(clone,section);
+                List<TemplateDataDictionary> sectionClone = SectionClone(clone, section);
                 entry.setValue(sectionClone);
             }
             return clone;
-        }
-        catch (java.lang.CloneNotSupportedException exc){
+        } catch (java.lang.CloneNotSupportedException exc) {
             throw new java.lang.Error(exc);
         }
     }
+
     /**
      * Deep clone replaces parent.
      */
-    public TemplateDataDictionary clone(TemplateDataDictionary parent){
-        TemplateDictionary clone = (TemplateDictionary)this.clone();
-        if (null != parent){
+    @Override
+    public TemplateDataDictionary clone(TemplateDataDictionary parent) {
+        TemplateDictionary clone = (TemplateDictionary) this.clone();
+        if (null != parent) {
             clone.parent = parent;
             return clone;
-        }
-        else
+        } else
             throw new IllegalStateException();
     }
 
@@ -126,15 +128,16 @@ public class TemplateDictionary
      * Variable API
      */
 
+    @Override
     public boolean hasVariable(String varName) {
 
-        if (this.variables.containsKey(varName))
-            return true;
-        else if (this.parent != null)
-            return this.parent.hasVariable(varName);
+        if (this.variables.containsKey(varName)) return true;
+        else if (this.parent != null) return this.parent.hasVariable(varName);
         else
             return false;
     }
+
+    @Override
     public String getVariable(String varName) {
 
         String value = this.variables.get(varName);
@@ -143,16 +146,19 @@ public class TemplateDictionary
 
             return value;
 
-        else if (this.parent != null) 
+        else if (this.parent != null)
 
             return this.parent.getVariable(varName);
-        else 
+        else
             return "";
     }
+
+    @Override
     public void setVariable(String varName, String val) {
 
         this.variables.put(varName, val);
     }
+
     public final void setVariable(String varName, int val) {
 
         this.setVariable(varName, String.valueOf(val));
@@ -162,45 +168,41 @@ public class TemplateDictionary
      * Section API
      */
 
-    public boolean hasNotSection(String sectionName){
+    public boolean hasNotSection(String sectionName) {
 
         return (!this.sections.containsKey(sectionName));
     }
-    public boolean hasSection(String sectionName){
+
+    public boolean hasSection(String sectionName) {
 
         return (this.sections.containsKey(sectionName));
     }
+
     /**
-     * @return a list of TemplateDictionaries that iterate the
-     * section, or null for a section not visible.
+     * @return a list of TemplateDictionaries that iterate the section, or null
+     *         for a section not visible.
      */
+    @Override
     public List<TemplateDataDictionary> getSection(String sectionName) {
 
         List<TemplateDataDictionary> list = this.sections.get(sectionName);
-        if (null != list)
-            return list;
+        if (null != list) return list;
         else {
             /*
              * Inherit section
              */
             TemplateDataDictionary parent = this.parent;
-            if (null != parent){
+            if (null != parent) {
 
                 List<TemplateDataDictionary> ancestor = parent.getSection(sectionName);
-                if (null != ancestor){
+                if (null != ancestor) {
                     /*
-                     * Section graph cloning from parent into children, as
-                     * 
-                     *     A - B - C
-                     *     _________
-                     *         |
-                     * 
-                     * A - B - C - B' - C'
-                     * 
+                     * Section graph cloning from parent into children, as A - B
+                     * - C _________ | A - B - C - B' - C'
                      */
-                    ancestor = SectionClone(this,ancestor);
+                    ancestor = SectionClone(this, ancestor);
 
-                    this.sections.put(sectionName,ancestor);
+                    this.sections.put(sectionName, ancestor);
 
                     return ancestor;
                 }
@@ -208,38 +210,43 @@ public class TemplateDictionary
             /*
              * Synthesize section
              */
-            if (this.hasVariable(sectionName))
-                return this.showSection(sectionName);
+            if (this.hasVariable(sectionName)) return this.showSection(sectionName);
             else
                 return null;
         }
     }
+
     /**
      * An aid to usage
-     * @param from Embedded section or include name
-     * @param to Target template name
+     *
+     * @param from
+     *            Embedded section or include name
+     * @param to
+     *            Target template name
      */
     public final List<TemplateDataDictionary> getSection(String from, String to) {
         return this.getSection(from);
     }
-    public final TemplateDataDictionary addSectionExclusive(String of, String sectionName){
-        if (this.hasNotSection(of))
-            return this.addSection(sectionName);
+
+    public final TemplateDataDictionary addSectionExclusive(String of, String sectionName) {
+        if (this.hasNotSection(of)) return this.addSection(sectionName);
         else
             return null;
     }
-    public final TemplateDataDictionary addSectionExclusive(String of, String from, String to){
-        if (this.hasNotSection(of))
-            return this.addSection(from,to);
+
+    public final TemplateDataDictionary addSectionExclusive(String of, String from, String to) {
+        if (this.hasNotSection(of)) return this.addSection(from, to);
         else
             return null;
     }
+
+    @Override
     public TemplateDataDictionary addSection(String sectionName) {
 
         TemplateDictionary add = new TemplateDictionary(this);
 
         List<TemplateDataDictionary> section = this.sections.get(sectionName);
-        if (null == section){
+        if (null == section) {
             section = new ArrayList<TemplateDataDictionary>();
             this.sections.put(sectionName, section);
         }
@@ -247,23 +254,29 @@ public class TemplateDictionary
         section.add(add);
         return add;
     }
+
     /**
      * An aid to usage
-     * @param from Embedded section or include name
-     * @param to Target template name
+     *
+     * @param from
+     *            Embedded section or include name
+     * @param to
+     *            Target template name
      */
     public final TemplateDataDictionary addSection(String from, String to) {
-        this.setVariable(from,to);
+        this.setVariable(from, to);
         return this.addSection(from);
     }
+
     /**
-     * @return A section data list having at least one section
-     * iteration data dictionary.
+     * @return A section data list having at least one section iteration data
+     *         dictionary.
      */
+    @Override
     public List<TemplateDataDictionary> showSection(String sectionName) {
 
         List<TemplateDataDictionary> section = this.sections.get(sectionName);
-        if (null == section){
+        if (null == section) {
             section = new ArrayList<TemplateDataDictionary>();
             TemplateDictionary show = new TemplateDictionary(this);
             section.add(show);
@@ -271,37 +284,50 @@ public class TemplateDictionary
         }
         return section;
     }
+
     /**
      * An aid to usage
-     * @param from Embedded section or include name
-     * @param to Target template name
+     *
+     * @param from
+     *            Embedded section or include name
+     * @param to
+     *            Target template name
      */
-    public final List<TemplateDataDictionary> showSection(String from, String to){
-        this.setVariable(from,to);
+    public final List<TemplateDataDictionary> showSection(String from, String to) {
+        this.setVariable(from, to);
         return this.showSection(from);
     }
+
     public void hideSection(String sectionName) {
 
         this.sections.remove(sectionName);
     }
+
     /**
      * An aid to usage
-     * @param from Embedded section or include name
-     * @param to Target template name
+     *
+     * @param from
+     *            Embedded section or include name
+     * @param to
+     *            Target template name
      */
-    public void hideSection(String from, String to){
+    public void hideSection(String from, String to) {
 
         this.sections.remove(from);
     }
 
-    public final static List<TemplateDataDictionary> SectionClone(TemplateDataDictionary parent, List<TemplateDataDictionary> section){
+    public final static List<TemplateDataDictionary> SectionClone(TemplateDataDictionary parent,
+        List<TemplateDataDictionary> section) {
 
-        List<TemplateDataDictionary> sectionClone = (List<TemplateDataDictionary>)((ArrayList<TemplateDataDictionary>)section).clone();
+        @SuppressWarnings("unchecked")
+        List<TemplateDataDictionary> sectionClone = (List<TemplateDataDictionary>) ((ArrayList<TemplateDataDictionary>) section)
+            .clone();
 
-        for (int sectionIndex = 0, sectionCount = sectionClone.size(); sectionIndex < sectionCount; sectionIndex++){
+        for (int sectionIndex = 0, sectionCount = sectionClone
+            .size(); sectionIndex < sectionCount; sectionIndex++) {
             TemplateDataDictionary sectionItem = sectionClone.get(sectionIndex);
             TemplateDataDictionary sectionItemClone = sectionItem.clone(parent);
-            sectionClone.set(sectionIndex,sectionItemClone);
+            sectionClone.set(sectionIndex, sectionItemClone);
         }
 
         return sectionClone;
