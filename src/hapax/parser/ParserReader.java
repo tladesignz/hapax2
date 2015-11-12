@@ -2,19 +2,19 @@
  * Hapax2
  * Copyright (c) 2007 Doug Coker
  * Copyright (c) 2009 John Pritchard
- * 
+ *
  * The MIT License
- *  
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,10 +30,7 @@ package hapax.parser;
  *
  * @author jdp
  */
-public final class ParserReader
-    extends java.lang.Object
-    implements java.lang.CharSequence
-{
+public final class ParserReader implements CharSequence {
 
     private char[] buffer;
 
@@ -41,61 +38,60 @@ public final class ParserReader
 
     private int advance;
 
-
-    public ParserReader(String string){
+    public ParserReader(String string) {
         super();
-        if (null != string && 0 != string.length())
-            this.buffer = string.toCharArray();
+        if (null != string && 0 != string.length()) this.buffer = string.toCharArray();
     }
 
-
-    public int lineNumber(){
+    public int lineNumber() {
         return this.lno;
     }
-    public int length(){
+
+    @Override
+    public int length() {
         char[] buf = this.buffer;
-        if (null != buf)
-            return buf.length;
+        if (null != buf) return buf.length;
         else
             return 0;
     }
-    public boolean next(){
+
+    public boolean next() {
         this.advance += 1;
         return true;
     }
-    public char charAt(int idx){
+
+    @Override
+    public char charAt(int idx) {
 
         idx += this.advance;
 
         char[] buf = this.buffer;
-        if (null != buf){
-            if (-1 < idx && idx < buf.length)
-                return buf[idx];
+        if (null != buf) {
+            if (-1 < idx && idx < buf.length) return buf[idx];
             else
-                throw new IndexOutOfBoundsException(String.valueOf(idx)+":{"+buf.length+'}');
-        }
-        else
-            throw new IndexOutOfBoundsException(String.valueOf(idx)+":{0}");
+                throw new IndexOutOfBoundsException(String.valueOf(idx) + ":{" + buf.length + '}');
+        } else
+            throw new IndexOutOfBoundsException(String.valueOf(idx) + ":{0}");
     }
-    public char charAtTest(int idx){
+
+    public char charAtTest(int idx) {
 
         idx += this.advance;
 
         char[] buf = this.buffer;
-        if (null != buf){
-            if (-1 < idx && idx < buf.length)
-                return buf[idx];
+        if (null != buf) {
+            if (-1 < idx && idx < buf.length) return buf[idx];
             else
                 return 0;
-        }
-        else
+        } else
             return 0;
     }
-    public int indexOf(String s){
-        if (null != s && 0 != s.length()){
+
+    public int indexOf(String s) {
+        if (null != s && 0 != s.length()) {
             char[] search = s.toCharArray();
             char[] buf = this.buffer;
-            if (null != buf){
+            if (null != buf) {
                 int sc = 0;
                 int scc = search.length;
                 int start = -1;
@@ -103,19 +99,16 @@ public final class ParserReader
                 int idx = this.advance;
                 int idxc = buf.length;
 
-                for (; idx < idxc; idx++){
+                for (; idx < idxc; idx++) {
 
-                    if (buf[idx] == search[sc++]){
+                    if (buf[idx] == search[sc++]) {
 
-                        if (-1 == start)
-                            start = idx;
+                        if (-1 == start) start = idx;
 
-                        if (sc >= scc)
-                            return start;
+                        if (sc >= scc) return start;
                         else
                             continue;
-                    }
-                    else {
+                    } else {
                         start = -1;
                         sc = 0;
                         continue;
@@ -123,118 +116,118 @@ public final class ParserReader
                 }
             }
             return -1;
-        }
-        else
+        } else
             throw new IllegalArgumentException(s);
     }
+
     /**
-     * @param start Offset index, inclusive
-     * @param end Offset index, exclusive
+     * @param start
+     *            Offset index, inclusive
+     * @param end
+     *            Offset index, exclusive
      */
-    public String delete(int start, int end){
+    public String delete(int start, int end) {
 
         char[] buf = this.buffer;
-        if (null != buf){
+        if (null != buf) {
             int buflen = buf.length;
-            if ((-1 < start && start < buflen)&&(start <= end && end <= buflen)){
-                if (start == end)
-                    return "";
+            if ((-1 < start && start < buflen) && (start <= end && end <= buflen)) {
+                if (start == end) return "";
                 else {
-                    int relen = (end-start);
+                    int relen = (end - start);
                     char[] re = new char[relen];
-                    System.arraycopy(buf,start,re,0,relen);
-                    int nblen = (buflen-relen);
-                    if (0 == nblen)
-                        this.buffer = null;
+                    System.arraycopy(buf, start, re, 0, relen);
+                    int nblen = (buflen - relen);
+                    if (0 == nblen) this.buffer = null;
                     else {
-                        int term = (buflen-1);
+                        int term = (buflen - 1);
                         char[] nb = new char[nblen];
-                        if (0 == start){
+                        if (0 == start) {
                             /*
                              * Copy buffer tail to new buffer
                              */
-                            System.arraycopy(buf,end,nb,0,nblen);
+                            System.arraycopy(buf, end, nb, 0, nblen);
                             this.buffer = nb;
-                        }
-                        else if (term == end){
+                        } else if (term == end) {
                             /*
                              * Copy buffer head to new buffer
                              */
-                            System.arraycopy(buf,0,nb,0,nblen);
+                            System.arraycopy(buf, 0, nb, 0, nblen);
                             this.buffer = nb;
-                        }
-                        else {
+                        } else {
                             /*
                              * Copy buffer head & tail to new buffer
                              */
                             int nbalen = start;
-                            int nbblen = buflen-end;
-                            System.arraycopy(buf,0,nb,0,nbalen);
-                            System.arraycopy(buf,end,nb,nbalen,nbblen);
+                            int nbblen = buflen - end;
+                            System.arraycopy(buf, 0, nb, 0, nbalen);
+                            System.arraycopy(buf, end, nb, nbalen, nbblen);
                             this.buffer = nb;
                         }
                     }
-                    return this.lines(re,0,relen);
+                    return this.lines(re, 0, relen);
                 }
-            }
-            else
-                throw new IndexOutOfBoundsException(String.valueOf(start)+':'+String.valueOf(start)+":{"+buf.length+'}');
-        }
-        else
-            throw new IndexOutOfBoundsException(String.valueOf(start)+':'+String.valueOf(start)+":{0}");
+            } else
+                throw new IndexOutOfBoundsException(
+                    String.valueOf(start) + ':' + String.valueOf(start) + ":{" + buf.length + '}');
+        } else
+            throw new IndexOutOfBoundsException(
+                String.valueOf(start) + ':' + String.valueOf(start) + ":{0}");
     }
-    public String truncate(){
+
+    public String truncate() {
 
         char[] buf = this.buffer;
         this.buffer = null;
-        return this.lines(buf,0,-1);
+        return this.lines(buf, 0, -1);
     }
-    public CharSequence subSequence(int start, int end){
+
+    @Override
+    public CharSequence subSequence(int start, int end) {
 
         char[] buf = this.buffer;
-        if (null != buf){
+        if (null != buf) {
             int buflen = buf.length;
-            if ((-1 < start && start < buflen)&&(start <= end && end <= buflen)){
-                if (start == end)
-                    return "";
+            if ((-1 < start && start < buflen) && (start <= end && end <= buflen)) {
+                if (start == end) return "";
                 else {
-                    int relen = (end-start);
+                    int relen = (end - start);
                     char[] re = new char[relen];
-                    System.arraycopy(buf,start,re,0,relen);
-                    return new String(re,0,relen);
+                    System.arraycopy(buf, start, re, 0, relen);
+                    return new String(re, 0, relen);
                 }
-            }
-            else
-                throw new IndexOutOfBoundsException(String.valueOf(start)+':'+String.valueOf(start)+":{"+buf.length+'}');
-        }
-        else
-            throw new IndexOutOfBoundsException(String.valueOf(start)+':'+String.valueOf(start)+":{0}");
+            } else
+                throw new IndexOutOfBoundsException(
+                    String.valueOf(start) + ':' + String.valueOf(start) + ":{" + buf.length + '}');
+        } else
+            throw new IndexOutOfBoundsException(
+                String.valueOf(start) + ':' + String.valueOf(start) + ":{0}");
     }
-    public String toString(){
+
+    @Override
+    public String toString() {
 
         char[] buf = this.buffer;
-        if (null != buf)
-            return new String(buf,0,buf.length);
+        if (null != buf) return new String(buf, 0, buf.length);
         else
             return "";
     }
 
-    protected String lines(char[] re, int ofs, int len){
+    protected String lines(char[] re, int ofs, int len) {
 
         this.advance = 0;
 
-        if (-1 == len)
-            len = ((null != re)?(re.length):(0));
+        if (-1 == len) len = ((null != re) ? (re.length) : (0));
 
-        this.lno += CountLines(re,ofs,len);
+        this.lno += CountLines(re, ofs, len);
 
-        return new String(re,ofs,len);
+        return new String(re, ofs, len);
     }
-    protected static int CountLines(char[] re, int ofs, int len){
+
+    protected static int CountLines(char[] re, int ofs, int len) {
         int num = 0;
-        for (; ofs < len; ofs++){
-            if ('\n' == re[ofs])
-                num += 1;
+        for (; ofs < len; ofs++) {
+            if ('\n' == re[ofs]) num += 1;
         }
         return num;
     }
